@@ -4,7 +4,7 @@ test-dac:
   allow_failure: true
   dependencies: [install-gams-dac,build-dac]
   variables:
-    qtpath: /Users/gitlab/Qt/6.6.2/macos/bin
+    qtpath: /Users/gitlab/Qt/6.6.3/macos/bin
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
     - PATH="${qtpath}:${GAMS_PATH}:${PATH}"
@@ -31,7 +31,7 @@ test-deg:
   allow_failure: true
   dependencies: [install-gams-deg,build-deg]
   variables:
-    qtpath: /Users/gitlab/Qt/6.6.2/macos/bin
+    qtpath: /Users/gitlab/Qt/6.6.3/macos/bin
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - PATH="${qtpath}:${GAMS_PATH}:${PATH}"
