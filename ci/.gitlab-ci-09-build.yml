@@ -2,7 +2,7 @@ build-dac:
   stage: build
   tags: [macos-arm64]
   variables:
-    qtpath: /Users/gitlab/Qt/6.6.3/macos/bin
+    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
   script:
     - printf "GAMS_DISTRIB=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`\n" > gamsinclude.pri
     - printf "GAMS_DISTRIB_C_API=\$\$GAMS_DISTRIB/apifiles/C/api\n" >> gamsinclude.pri
@@ -21,7 +21,7 @@ build-deg:
   stage: build
   tags: [macos]
   variables:
-    qtpath: /Users/gitlab/Qt/6.6.3/macos/bin
+    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
   script:
     - printf "GAMS_DISTRIB=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`\n" > gamsinclude.pri
     - printf "GAMS_DISTRIB_C_API=\$\$GAMS_DISTRIB/apifiles/C/api\n" >> gamsinclude.pri
@@ -40,7 +40,7 @@ build-leg:
   stage: build
   tags: [linux]
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/builder-qt6.6:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
   needs: [install-gams-leg]
   variables:
@@ -63,7 +63,7 @@ build-wei:
   variables:
      cmd_vcvars: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-qt6.6:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   script:
     - '& $cmd_vcvars'
     - $data = 
@@ -91,7 +91,7 @@ build-wei-debug:
   variables:
      cmd_vcvars: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-qt6.6:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   script:
     - '& $cmd_vcvars'
     - $data = 

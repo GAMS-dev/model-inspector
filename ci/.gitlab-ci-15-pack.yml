@@ -2,7 +2,7 @@ pack-dac:
   stage: pack
   tags: [macos-arm64]
   variables:
-    qtpath: /Users/gitlab/Qt/6.6.3/macos/bin
+    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
   needs: [build-dac]
   script:
     - WORKSPACE=$(pwd)
@@ -51,7 +51,7 @@ pack-deg:
   stage: pack
   tags: [macos]
   variables:
-    qtpath: /Users/gitlab/Qt/6.6.3/macos/bin
+    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
   needs: [build-deg]
   script:
     - WORKSPACE=$(pwd)
@@ -102,7 +102,7 @@ pack-leg:
   stage: pack
   tags: [linux]
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/builder-qt6.6:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
   needs: [build-leg]
   script:
@@ -128,7 +128,7 @@ pack-wei:
   stage: pack
   tags: [windows]
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-qt6.6:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   needs: [build-wei]
   variables:
     vcinsdir: C:\Program Files\Microsoft Visual Studio\2022\Community\VC
@@ -169,10 +169,10 @@ pack-wei-debug:
     - when: always
   tags: [windows]
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-qt6.6:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   needs: [build-wei-debug]
   variables:
-    vcinsdir: C:\Program Files\Microsoft Visual Studio\2022\Community\VC
+    vcinsdir: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC
     cmd_vcvars: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat
   script:
     - $env:VCINSTALLDIR = "$vcinsdir"
