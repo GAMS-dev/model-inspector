@@ -164,8 +164,6 @@ public:
 
     ~DataHandler();
 
-    void aggregate(const QSharedPointer<AbstractViewConfiguration> &viewConfig);
-
     void loadData(const QSharedPointer<AbstractViewConfiguration> &viewConfig);
 
     QVariant data(int row, int column, int viewId) const;
@@ -189,11 +187,15 @@ public:
 
     int rowCount(int viewId) const;
 
-    int rowEntries(int row, int viewId) const;
+    int rowEntryCount(int row, int viewId) const;
 
     int columnCount(int viewId) const;
 
-    int columnEntries(int column, int viewId) const;
+    int columnEntryCount(int column, int viewId) const;
+
+    const QList<int>& rowIndices(int viewId, int row) const;
+
+    const QList<int>& columnIndices(int viewId, int column) const;
 
     int symbolRowCount(int viewId) const;
 
@@ -227,6 +229,8 @@ private:
     /// \brief Abstract data provider cache, where key is the view ID.
     ///
     QMap<int, QSharedPointer<AbstractDataProvider>> mDataCache;
+
+    QList<int> mDummyIndices;
 };
 
 }

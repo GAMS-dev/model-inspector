@@ -274,7 +274,7 @@ void ModelInstance::loadSymbols()
             sym->setFirstSection(sectionIndexEqn);
             sym->setLogicalIndex(eqnIndex++);
             sectionIndexEqn += sym->entries();
-            loadEquationDimensions(sym); // TODO !!! PERF optimize or load/lazy load
+            loadEquationDimensions(sym);
             sym->setLabelTree(QSharedPointer<LabelTreeItem>(new LabelTreeItem));
             mEquations.append(sym);
             for (int i=sym->firstSection(); i<=sym->lastSection(); ++i) {
@@ -288,7 +288,7 @@ void ModelInstance::loadSymbols()
             sym->setFirstSection(sectionIndexVar);
             sym->setLogicalIndex(varIndex++);
             sectionIndexVar += sym->entries();
-            loadVariableDimensions(sym); // TODO !!! PERF optimize or load/lazy load
+            loadVariableDimensions(sym);
             sym->setLabelTree(QSharedPointer<LabelTreeItem>(new LabelTreeItem));
             mVariables.append(sym);
             for (int i=sym->firstSection(); i<=sym->lastSection(); ++i) {
@@ -357,19 +357,17 @@ void ModelInstance::loadEquationDimensions(Symbol *symbol)
             mLogMessages << "ERROR: calling gmoGetiSolverQuiet() in ModelInstance::loadDimensions()";
             continue;
         }
-
         int symIndex;
         if (dctRowUels(mDCT, symbol->offset()+j, &symIndex, domains, &nDomains)) {
             mLogMessages << "ERROR: calling dctRowUels() in ModelInstance::loadDimensions()";
             continue;
         }
-
-        QStringList labels;
+        QStringList labels(symbol->dimension());
         for (int k=0; k<nDomains; ++k) {
             dctUelLabel(mDCT, domains[k], &quote, labelName, GMS_SSSIZE);
-            labels << labelName;
+            labels[k] = labelName;
         }
-        symbol->setLabels(symbol->firstSection()+j, labels);
+        symbol->sectionLabels()[symbol->firstSection()+j] = std::move(labels);
     }
 }
 
@@ -384,19 +382,17 @@ void ModelInstance::loadVariableDimensions(Symbol *symbol)
             mLogMessages << "ERROR: calling gmoGetjSolverQuiet() in ModelInstance::loadDimensions()";
             continue;
         }
-
         int symIndex;
         if (dctColUels(mDCT, symbol->offset()+j, &symIndex, domains, &nDomains)) {
             mLogMessages << "ERROR: calling dctColUels() in ModelInstance::loadDimensions()";
             continue;
         }
-
-        QStringList labels;
+        QStringList labels(symbol->dimension());
         for (int k=0; k<nDomains; ++k) {
             dctUelLabel(mDCT, domains[k], &quote, labelName, GMS_SSSIZE);
-            labels << labelName;
+            labels[k] = labelName;
         }
-        symbol->setLabels(symbol->firstSection()+j, labels);
+        symbol->sectionLabels()[symbol->firstSection()+j] = std::move(labels);
     }
 }
 
@@ -436,9 +432,9 @@ int ModelInstance::rowCount(int viewId) const
     return mDataHandler->rowCount(viewId);
 }
 
-int ModelInstance::rowEntries(int row, int viewId) const
+int ModelInstance::rowEntryCount(int row, int viewId) const
 {
-    return mDataHandler->rowEntries(row, viewId);
+    return mDataHandler->rowEntryCount(row, viewId);
 }
 
 int ModelInstance::columnCount(int viewId) const
@@ -446,9 +442,19 @@ int ModelInstance::columnCount(int viewId) const
     return mDataHandler->columnCount(viewId);
 }
 
-int ModelInstance::columnEntries(int column, int viewId) const
+int ModelInstance::columnEntryCount(int column, int viewId) const
 {
-    return mDataHandler->columnEntries(column, viewId);
+    return mDataHandler->columnEntryCount(column, viewId);
+}
+
+const QList<int> &ModelInstance::rowIndices(int viewId, int row) const
+{
+    return mDataHandler->rowIndices(viewId, row);
+}
+
+const QList<int> &ModelInstance::columnIndices(int viewId, int column) const
+{
+    return mDataHandler->columnIndices(viewId, column);
 }
 
 int ModelInstance::symbolRowCount(int viewId) const
@@ -466,7 +472,7 @@ QSharedPointer<AbstractViewConfiguration> ModelInstance::clone(int viewId, int n
     return mDataHandler->clone(viewId, newViewId);
 }
 
-void ModelInstance::loadViewData(QSharedPointer<AbstractViewConfiguration> viewConfig)
+void ModelInstance::loadViewData(const QSharedPointer<AbstractViewConfiguration>& viewConfig)
 {
     return mDataHandler->loadData(viewConfig);
 }

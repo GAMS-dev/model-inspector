@@ -76,13 +76,6 @@ void AbstractTableViewFrame::resetZoom()
     ui->tableView->resetZoom();
 }
 
-void AbstractTableViewFrame::setIdentifierLabelFilter(const IdentifierState &state,
-                                                      Qt::Orientation orientation)
-{
-    Q_UNUSED(state);
-    Q_UNUSED(orientation);
-}
-
 }
 }
 }

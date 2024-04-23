@@ -95,6 +95,10 @@ void TestEmptyModelInstance::test_default()
     QVERIFY(instance.dataTree(-42) != nullptr);
     QCOMPARE(instance.maxSymbolDimension(0, Qt::Horizontal), 0);
     QCOMPARE(instance.maxSymbolDimension(0, Qt::Vertical), 0);
+    QCOMPARE(instance.rowEntryCount(0, 0), 0);
+    QCOMPARE(instance.rowEntryCount(-1, -1), 0);
+    QCOMPARE(instance.columnEntryCount(0, 0), 0);
+    QCOMPARE(instance.columnEntryCount(-1, -1), 0);
 }
 
 void TestEmptyModelInstance::test_getSet()

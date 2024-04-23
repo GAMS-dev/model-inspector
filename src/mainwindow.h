@@ -38,7 +38,6 @@ class GAMSProcess;
 namespace gams {
 namespace studio {
 namespace mii {
-class AggregationDialog;
 class FilterDialog;
 }
 }
@@ -70,7 +69,6 @@ private slots:
 
     // View
     void on_actionFilters_triggered();
-    void on_actionAggregation_triggered();
     void on_actionShow_search_result_triggered();
     void showAbsoluteValues();
     void on_actionShow_Output_triggered();
@@ -85,7 +83,6 @@ private slots:
     // Other
     void loadModelInstance(int exitCode, QProcess::ExitStatus exitStatus);
     void handleLibProcessResult(int exitCode, QProcess::ExitStatus exitStatus);
-    void aggregationUpdate();
     void viewConfigUpdate();
     void setGlobalFiltersData();
     void searchResultSelectionChanged(const QModelIndex &index);
@@ -107,8 +104,6 @@ private:
 
     void loadGAMSModel(const QString &path);
 
-    void setAggregationData();
-
     void showDialog(QDialog *dialog);
 
     QString workspace() const;
@@ -123,9 +118,7 @@ private:
     Ui::MainWindow *ui;
     GAMSLibProcess *mLibProcess;
     QSharedPointer<GAMSProcess> mProcess;
-    gams::studio::mii::AggregationDialog *mAggregationDialog;
     gams::studio::mii::FilterDialog *mFilterDialog;
-    QLabel *mAggregationStatusLabel;
     QFileSystemWatcher mScrWatcher;
     const QString mScrUpdateWarning = "Warning: It looks like the scratch data has not been updated.";
     bool mScrFilesUpdated = false;

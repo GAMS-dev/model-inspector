@@ -19,14 +19,15 @@
  *
  */
 #include "symbolviewframe.h"
-#include "mii/identifierfiltermodel.h"
-#include "mii/labelfiltermodel.h"
 #include "viewconfigurationprovider.h"
 #include "hierarchicalheaderview.h"
 #include "ui_standardtableviewframe.h"
 #include "symbolmodelinstancetablemodel.h"
 #include "abstractmodelinstance.h"
-#include "valueformatproxymodel.h"
+#include "symbolfiltermodel.h"
+
+#include <QAction>
+#include <QMenu>
 
 namespace gams {
 namespace studio{
@@ -36,19 +37,32 @@ SymbolViewFrame::SymbolViewFrame(int view,
                                  const QSharedPointer<AbstractModelInstance> &modelInstance,
                                  QWidget *parent,
                                  Qt::WindowFlags f)
-    : AbstractStandardTableViewFrame(parent, f)
+    : AbstractTableViewFrame(parent, f)
+    , mSelectionMenu(new QMenu(this))
 {
-    mViewConfig = QSharedPointer<AbstractViewConfiguration>(ViewConfigurationProvider::configuration(type(), modelInstance));
+    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    mSelectionMenu->addAction(mResetAction);
+    mViewConfig = QSharedPointer<AbstractViewConfiguration>(ViewConfigurationProvider::configuration(type(),
+                                                                                                     modelInstance));
     mViewConfig->setViewId(view);
+    connect(ui->tableView, &QWidget::customContextMenuRequested,
+            this, &SymbolViewFrame::customMenuRequested);
+    connect(mResetAction, &QAction::triggered, this, &SymbolViewFrame::resetHeaderFilter);
 }
 
 SymbolViewFrame::SymbolViewFrame(const QSharedPointer<AbstractModelInstance> &modelInstance,
                                  const QSharedPointer<AbstractViewConfiguration> &viewConfig,
                                  QWidget *parent, Qt::WindowFlags f)
-    : AbstractStandardTableViewFrame(parent, f)
+    : AbstractTableViewFrame(parent, f)
+    , mSelectionMenu(new QMenu(this))
 {
+    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    mSelectionMenu->addAction(mResetAction);
     mModelInstance = modelInstance;
     mViewConfig = viewConfig;
+    connect(ui->tableView, &QWidget::customContextMenuRequested,
+            this, &SymbolViewFrame::customMenuRequested);
+    connect(mResetAction, &QAction::triggered, this, &SymbolViewFrame::resetHeaderFilter);
 }
 
 AbstractTableViewFrame *SymbolViewFrame::clone(int viewId)
@@ -56,19 +70,7 @@ AbstractTableViewFrame *SymbolViewFrame::clone(int viewId)
     auto viewConfig = QSharedPointer<AbstractViewConfiguration>(mModelInstance->clone(mViewConfig->viewId(), viewId));
     auto frame = new SymbolViewFrame(mModelInstance, viewConfig, parentWidget(), windowFlags());
     frame->setupView();
-    frame->updateFilters(AbstractViewConfiguration::ValueConfig |
-                         AbstractViewConfiguration::LabelConfig |
-                         AbstractViewConfiguration::IdentifierConfig);
-    for (auto iter=mViewConfig->currentIdentifierFilter()[Qt::Horizontal].constBegin();
-         iter!=mViewConfig->currentIdentifierFilter()[Qt::Horizontal].constEnd(); ++iter) {
-        frame->mIdentifierLabelFilterModel->setIdentifierState(*iter, Qt::Horizontal);
-        frame->mHorizontalHeader->setIdentifierState(*iter);
-    }
-    for (auto iter=mViewConfig->currentIdentifierFilter()[Qt::Vertical].constBegin();
-         iter!=mViewConfig->currentIdentifierFilter()[Qt::Vertical].constEnd(); ++iter) {
-        frame->mIdentifierLabelFilterModel->setIdentifierState(*iter, Qt::Vertical);
-        frame->mVerticalHeader->setIdentifierState(*iter);
-    }
+    frame->evaluateFilters();
     return frame;
 }
 
@@ -85,109 +87,82 @@ ViewHelper::ViewDataType SymbolViewFrame::type() const
     return ViewHelper::ViewDataType::Symbols;
 }
 
-void SymbolViewFrame::updateView()
-{
-    mBaseModel->setModelInstance(mModelInstance);
-    //ui->tableView->resizeColumnsToContents();
-    //ui->tableView->resizeRowsToContents();
-    emit filtersChanged();
-}
-
 bool SymbolViewFrame::hasData() const
 {
     return mBaseModel && mBaseModel->rowCount() && mBaseModel->columnCount();
-}
-
-void SymbolViewFrame::updateLabelFilter()
-{
-    if (mLabelFilterModel)
-        mLabelFilterModel->setLabelFilter(mViewConfig->currentLabelFiler());
-    if (mHorizontalHeader)
-        mHorizontalHeader->resetSymbolLabelFilters();
-    if (mVerticalHeader)
-        mVerticalHeader->resetSymbolLabelFilters();
-    if (mIdentifierLabelFilterModel) {
-        mIdentifierLabelFilterModel->clearIdentifierFilter();
-        mIdentifierLabelFilterModel->invalidate();
-    }
 }
 
 void SymbolViewFrame::setShowAbsoluteValues(bool absoluteValues)
 {
     if (!mBaseModel)
         return;
-    mViewConfig->currentAggregation().setUseAbsoluteValues(absoluteValues);
     mViewConfig->currentValueFilter().UseAbsoluteValues = absoluteValues;
-    mModelInstance->loadViewData(mViewConfig);
-    emit mBaseModel->dataChanged(QModelIndex(), QModelIndex(), {Qt::DisplayRole});
-    mValueFormatModel->setValueFilter(mViewConfig->currentValueFilter());
+    mViewConfig->currentValueFilter().UseAbsoluteValuesGlobal = absoluteValues;
+    mViewConfig->defaultValueFilter().MaxValue = std::numeric_limits<double>::max();
+    mViewConfig->defaultValueFilter().MinValue = std::numeric_limits<double>::lowest();
+    mViewConfig->currentValueFilter().MaxValue = std::numeric_limits<double>::max();
+    mViewConfig->currentValueFilter().MinValue = std::numeric_limits<double>::lowest();
+    evaluateFilters();
 }
 
-void SymbolViewFrame::setIdentifierLabelFilter(const IdentifierState &state,
-                                               Qt::Orientation orientation)
+void SymbolViewFrame::evaluateFilters()
 {
-    if (!mIdentifierLabelFilterModel) {
+    if (!mHeaderFilterModel)
         return;
-    }
-    if (state.disabled() && mIdentifierFilterModel) {
-        setIdentifierFilterCheckState(state.SymbolIndex, Qt::Unchecked, orientation);
-        mIdentifierFilterModel->setIdentifierFilter(mViewConfig->currentIdentifierFilter());
-    } else {
-        mViewConfig->currentIdentifierFilter()[orientation][state.SymbolIndex] = state;
-        mIdentifierLabelFilterModel->setIdentifierState(state, orientation);
-    }
-    updateView();
+    mModelInstance->loadViewData(mViewConfig);
+    mHeaderFilterModel->evaluateFilters();
     emit filtersChanged();
 }
 
-void SymbolViewFrame::updateValueFilter()
+void SymbolViewFrame::customMenuRequested(const QPoint &pos)
 {
-    if (!mBaseModel)
+    mSelectionMenu->popup(ui->tableView->viewport()->mapToGlobal(pos));
+}
+
+void SymbolViewFrame::resetHeaderFilter()
+{
+    if (!mHorizontalHeader || !mVerticalHeader)
         return;
-    mModelInstance->loadViewData(mViewConfig);
-    emit mBaseModel->dataChanged(QModelIndex(), QModelIndex(), {Qt::DisplayRole});
-    mValueFormatModel->setValueFilter(mViewConfig->currentValueFilter());
+    auto localAbs = mViewConfig->currentValueFilter().UseAbsoluteValues;
+    auto globalAbs = mViewConfig->currentValueFilter().UseAbsoluteValuesGlobal;
+    mViewConfig->resetValueFilter();
+    if (globalAbs) {
+        mViewConfig->currentValueFilter().UseAbsoluteValues = localAbs;
+        mViewConfig->currentValueFilter().UseAbsoluteValuesGlobal = globalAbs;
+    }
+    mViewConfig->resetIdentifierFilter();
+    mViewConfig->resetLabelFilter();
+    evaluateFilters();
 }
 
 void SymbolViewFrame::setupView()
 {
     mHorizontalHeader = new HierarchicalHeaderView(Qt::Horizontal,
                                                    mModelInstance,
-                                                   mViewConfig->viewId(),
+                                                   mViewConfig,
                                                    ui->tableView);
-    mHorizontalHeader->setViewType(type());
     connect(mHorizontalHeader, &HierarchicalHeaderView::filterChanged,
-            this, &SymbolViewFrame::setIdentifierLabelFilter);
+            this, &SymbolViewFrame::evaluateFilters);
     mVerticalHeader = new HierarchicalHeaderView(Qt::Vertical,
                                                  mModelInstance,
-                                                 mViewConfig->viewId(),
+                                                 mViewConfig,
                                                  ui->tableView);
-    mVerticalHeader->setViewType(type());
     connect(mVerticalHeader, &HierarchicalHeaderView::filterChanged,
-            this, &SymbolViewFrame::setIdentifierLabelFilter);
+            this, &SymbolViewFrame::evaluateFilters);
 
     auto baseModel = new SymbolModelInstanceTableModel(mModelInstance, mViewConfig, ui->tableView);
-    mValueFormatModel = new JacobianValueFormatProxyModel(ui->tableView);
-    mValueFormatModel->setSourceModel(baseModel);
-    mLabelFilterModel = new LabelFilterModel(mModelInstance, ui->tableView);
-    mLabelFilterModel->setSourceModel(mValueFormatModel);
-    mIdentifierFilterModel = new IdentifierFilterModel(mModelInstance, ui->tableView);
-    mIdentifierFilterModel->setSourceModel(mLabelFilterModel);
-    mIdentifierLabelFilterModel = new IdentifierLabelFilterModel(mModelInstance, ui->tableView);
-    mIdentifierLabelFilterModel->setSourceModel(mIdentifierFilterModel);
+    mHeaderFilterModel = new SymbolFilterModel(mModelInstance, mViewConfig, ui->tableView);
+    mHeaderFilterModel->setSourceModel(baseModel);
 
     ui->tableView->setHorizontalHeader(mHorizontalHeader);
     ui->tableView->setVerticalHeader(mVerticalHeader);
     auto oldSelectionModel = ui->tableView->selectionModel();
-    ui->tableView->setModel(mIdentifierLabelFilterModel);
+    ui->tableView->setModel(mHeaderFilterModel);
     delete oldSelectionModel;
     mHorizontalHeader->setVisible(true);
     mVerticalHeader->setVisible(true);
 
     mBaseModel = QSharedPointer<SymbolModelInstanceTableModel>(baseModel);
-
-    //ui->tableView->resizeColumnsToContents();
-    //ui->tableView->resizeRowsToContents();
 }
 
 }

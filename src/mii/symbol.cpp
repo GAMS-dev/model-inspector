@@ -90,7 +90,7 @@ void Symbol::appendDomainLabel(const QString &label)
     mDomainLabels.push_back(label);
 }
 
-const SectionLabels &Symbol::sectionLabels() const
+SectionLabels &Symbol::sectionLabels()
 {
     return mSectionLabels;
 }
@@ -101,11 +101,6 @@ QString Symbol::label(int sectionIndex, int dimension) const
     if (dimension < data.size())
         return data[dimension];
     return QString();
-}
-
-void Symbol::setLabels(int sectionIndex, const QStringList &labels)
-{
-    mSectionLabels[sectionIndex] = labels;
 }
 
 bool Symbol::contains(int sectionIndex) const

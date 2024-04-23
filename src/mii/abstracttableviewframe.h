@@ -61,10 +61,6 @@ signals:
 
     void searchResultUpdated(const QList<SearchResult>&);
 
-protected slots:
-    virtual void setIdentifierLabelFilter(const gams::studio::mii::IdentifierState &state,
-                                          Qt::Orientation orientation);
-
 protected:
     Ui::StandardTableViewFrame* ui;
 };

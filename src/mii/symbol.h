@@ -68,11 +68,9 @@ public:
 
     void appendDomainLabel(const QString &label);
 
-    const SectionLabels& sectionLabels() const;
+    SectionLabels& sectionLabels();
 
     QString label(int sectionIndex, int dimension) const;
-
-    void setLabels(int sectionIndex, const QStringList &labels);
 
     bool contains(int sectionIndex) const;
 

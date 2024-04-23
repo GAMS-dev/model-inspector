@@ -96,14 +96,6 @@ void TestSymbol::test_getSet()
     QVERIFY(symbol.contains(symbol.lastSection()));
 
     ++i;
-    QStringList data { "a", "b" };
-    symbol.setLabels(value+i, data);
-    QCOMPARE(symbol.label(value+i, 0), "a");
-    QCOMPARE(symbol.label(value+i, 1), "b");
-    QCOMPARE(symbol.label(value+i, 2), QString());
-    SectionLabels sectionLabels { { value+i, data } };
-    QCOMPARE(symbol.sectionLabels(), sectionLabels);
-
     QSharedPointer<LabelTreeItem> labelTree(new LabelTreeItem);
     symbol.setLabelTree(labelTree);
     QVERIFY(symbol.labelTree() == labelTree);

@@ -36,6 +36,7 @@ class LabelFilterWidget;
 }
 
 class FilterTreeItem;
+class FilterTreeModel;
 
 class LabelFilterWidget : public QWidget
 {
@@ -46,6 +47,8 @@ public:
                                QWidget *parent = nullptr);
     ~LabelFilterWidget() override;
 
+    FilterTreeItem* data() const;
+
     void setData(FilterTreeItem *rootItem);
 
 protected:
@@ -55,11 +58,11 @@ signals:
     void filterChanged(const gams::studio::mii::IdentifierState&, Qt::Orientation);
 
 private slots:
-    void on_applyButton_clicked();
+    void applyClicked();
 
-    void on_selectButton_clicked();
+    void selectClicked();
 
-    void on_deselectButton_clicked();
+    void deselectClicked();
 
     void applyFilter(const QString &text);
 
@@ -70,6 +73,7 @@ private:
 private:
     Ui::LabelFilterWidget *ui;
     Qt::Orientation mOrientation;
+    FilterTreeModel* mBaseModel;
     QSortFilterProxyModel *mFilterModel;
 };
 

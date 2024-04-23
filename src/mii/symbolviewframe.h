@@ -21,15 +21,17 @@
 #ifndef SYMBOLVIEWFRAME_H
 #define SYMBOLVIEWFRAME_H
 
-#include "standardtableviewframe.h"
+#include "abstracttableviewframe.h"
 
 namespace gams {
 namespace studio{
 namespace mii {
 
+class SymbolFilterModel;
+class HierarchicalHeaderView;
 class SymbolModelInstanceTableModel;
 
-class SymbolViewFrame final : public AbstractStandardTableViewFrame
+class SymbolViewFrame final : public AbstractTableViewFrame
 {
     Q_OBJECT
 
@@ -52,26 +54,26 @@ public:
 
     void setShowAbsoluteValues(bool absoluteValues) override;
 
-    void updateView() override;
-
     bool hasData() const override;
 
-protected slots:
-    void updateLabelFilter() override;
+public slots:
+    void evaluateFilters() override;
 
-    void setIdentifierLabelFilter(const gams::studio::mii::IdentifierState &state,
-                                  Qt::Orientation orientation) override;
+private slots:
+    void customMenuRequested(const QPoint &pos);
 
-protected:
-    void updateValueFilter() override;
+    void resetHeaderFilter();
 
 private:
     void setupView();
 
 private:
+    QMenu *mSelectionMenu;
+    QAction *mResetAction = new QAction("Reset filter", this);
     QSharedPointer<SymbolModelInstanceTableModel> mBaseModel;
     HierarchicalHeaderView* mHorizontalHeader = nullptr;
     HierarchicalHeaderView* mVerticalHeader = nullptr;
+    SymbolFilterModel* mHeaderFilterModel = nullptr;
 };
 
 }

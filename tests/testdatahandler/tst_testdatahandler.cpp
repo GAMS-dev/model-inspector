@@ -37,7 +37,6 @@ void TestDataHandler::test_DataHandler_empty()
 {
     EmptyModelInstance modelInstance;
     DataHandler dataHandler(modelInstance);
-    dataHandler.aggregate(nullptr);
     QCOMPARE(dataHandler.data(-4, -2, -1), QVariant());
     QCOMPARE(dataHandler.data(4, 2, -1), QVariant());
     QCOMPARE(dataHandler.data(4, 2, 0), QVariant());
@@ -48,12 +47,12 @@ void TestDataHandler::test_DataHandler_empty()
     QCOMPARE(dataHandler.headerData(1, Qt::Vertical, 1), -1);
     QCOMPARE(dataHandler.rowCount(-1), 0);
     QCOMPARE(dataHandler.rowCount(0), 0);
-    QCOMPARE(dataHandler.rowEntries(-1, -1), 0);
-    QCOMPARE(dataHandler.rowEntries(0, 0), 0);
+    QCOMPARE(dataHandler.rowEntryCount(-1, -1), 0);
+    QCOMPARE(dataHandler.rowEntryCount(0, 0), 0);
     QCOMPARE(dataHandler.columnCount(-1), 0);
     QCOMPARE(dataHandler.columnCount(0), 0);
-    QCOMPARE(dataHandler.columnEntries(-1, -1), 0);
-    QCOMPARE(dataHandler.columnEntries(0, 0), 0);
+    QCOMPARE(dataHandler.columnEntryCount(-1, -1), 0);
+    QCOMPARE(dataHandler.columnEntryCount(0, 0), 0);
     QCOMPARE(dataHandler.maxSymbolDimension(0, Qt::Horizontal), 0);
     QCOMPARE(dataHandler.maxSymbolDimension(0, Qt::Vertical), 0);
     dataHandler.loadJacobian();

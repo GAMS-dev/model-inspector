@@ -103,7 +103,7 @@ void TestViewConfigurationProvider::test_viewConfiguration(AbstractViewConfigura
     QCOMPARE(viewConfig->viewType(), type);
     QCOMPARE(viewConfig->viewId(), (int)type);
 
-    // TODO test aggregation... when enabled again
+    QVERIFY(viewConfig->filterDialogState() == AbstractViewConfiguration::None);
 
     // test label filters
     QCOMPARE(viewConfig->currentLabelFiler(), LabelFilter());

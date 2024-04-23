@@ -34,9 +34,13 @@ LabelFilterWidget::LabelFilterWidget(Qt::Orientation orientation, QWidget *paren
     : QWidget(parent)
     , ui(new Ui::LabelFilterWidget)
     , mOrientation(orientation)
+    , mBaseModel(nullptr)
     , mFilterModel(nullptr)
 {
     ui->setupUi(this);
+    connect(ui->applyButton, &QPushButton::clicked, this, &LabelFilterWidget::applyClicked);
+    connect(ui->selectButton, &QPushButton::clicked, this, &LabelFilterWidget::selectClicked);
+    connect(ui->deselectButton, &QPushButton::clicked, this, &LabelFilterWidget::deselectClicked);
 }
 
 LabelFilterWidget::~LabelFilterWidget()
@@ -44,14 +48,22 @@ LabelFilterWidget::~LabelFilterWidget()
     delete ui;
 }
 
+FilterTreeItem *LabelFilterWidget::data() const
+{
+    if (mBaseModel) {
+        return mBaseModel->filterItem();
+    }
+    return nullptr;
+}
+
 void LabelFilterWidget::setData(FilterTreeItem *rootItem)
 {
     auto oldModel = ui->labelView->selectionModel();
-    auto treeModel = new FilterTreeModel(rootItem, ui->labelView);
+    mBaseModel = new FilterTreeModel(rootItem, ui->labelView);
     mFilterModel = new QSortFilterProxyModel(ui->labelView);
     mFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mFilterModel->setRecursiveFilteringEnabled(true);
-    mFilterModel->setSourceModel(treeModel);
+    mFilterModel->setSourceModel(mBaseModel);
     ui->labelView->setModel(mFilterModel);
     ui->labelView->expandAll();
     if (oldModel)
@@ -68,21 +80,21 @@ void LabelFilterWidget::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
 }
 
-void LabelFilterWidget::on_applyButton_clicked()
+void LabelFilterWidget::applyClicked()
 {
     emit filterChanged(identifierState(), mOrientation);
-    auto menu = dynamic_cast<QMenu*>(this->parent());
+    auto menu = qobject_cast<QMenu*>(this->parent());
     if (menu)
         menu->close();
     ui->labelEdit->clear();
 }
 
-void LabelFilterWidget::on_selectButton_clicked()
+void LabelFilterWidget::selectClicked()
 {
     applyCheckState(true);
 }
 
-void LabelFilterWidget::on_deselectButton_clicked()
+void LabelFilterWidget::deselectClicked()
 {
     applyCheckState(false);
 }
@@ -99,9 +111,9 @@ void LabelFilterWidget::applyCheckState(bool state)
 {
     if (!mFilterModel)
         return;
-    QModelIndexList indexes;
+    QModelIndexList indexes(mFilterModel->rowCount());
     for(int row=0; row<mFilterModel->rowCount(); ++row) {
-        indexes.append(mFilterModel->index(row, 0));
+        indexes[row] = mFilterModel->index(row, 0);
     }
     while (!indexes.isEmpty()) {
         auto index = indexes.takeFirst();
@@ -120,9 +132,8 @@ IdentifierState LabelFilterWidget::identifierState()
 {
     if (!mFilterModel)
         return IdentifierState();
-    QList<FilterTreeItem*> items {
-        static_cast<FilterTreeModel*>(mFilterModel->sourceModel())->filterItem()
-    };
+    auto rootItem = static_cast<FilterTreeModel*>(mFilterModel->sourceModel())->filterItem();
+    QList<FilterTreeItem*> items { rootItem };
     IdentifierState state;
     state.Enabled = true;
     state.SectionIndex = items.first()->sectionIndex();
@@ -133,9 +144,11 @@ IdentifierState LabelFilterWidget::identifierState()
         items.append(item->childs());
         if (!item->isCheckable())
             continue;
-        state.CheckStates[item->sectionIndex()] = item->checked();
+        if (item->checked() == Qt::Unchecked) {
+            state.CheckStates.insert(item->sectionIndex());
+        }
     }
-    state.Checked = state.disabled() ? Qt::Unchecked : Qt::Checked;
+    state.Checked = rootItem->checked() != Qt::Unchecked ? Qt::Checked : Qt::Unchecked;
     return state;
 }
 

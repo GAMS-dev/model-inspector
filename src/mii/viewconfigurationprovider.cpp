@@ -191,8 +191,6 @@ public:
         if (!eqnFilter.isEmpty())
             mDefaultIdentifierFilter[Qt::Vertical] = eqnFilter;
         mCurrentIdentifierFilter = mDefaultIdentifierFilter;
-        mDefaultAggregation.setViewType(this->viewType());
-        mCurrentAggregation.setViewType(this->viewType());
     }
 
     AbstractViewConfiguration* clone() override

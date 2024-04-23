@@ -24,7 +24,6 @@
 #include <QHeaderView>
 
 #include "common.h"
-#include "aggregation.h"
 
 class QMenu;
 
@@ -33,6 +32,7 @@ namespace studio{
 namespace mii {
 
 class AbstractModelInstance;
+class AbstractViewConfiguration;
 class LabelFilterWidget;
 
 class HierarchicalHeaderView final : public QHeaderView
@@ -42,31 +42,22 @@ class HierarchicalHeaderView final : public QHeaderView
 public:
     HierarchicalHeaderView(Qt::Orientation orientation,
                            const QSharedPointer<AbstractModelInstance> &modelInstance,
-                           int viewId,
+                           const QSharedPointer<AbstractViewConfiguration> &viewConfig,
                            QWidget *parent = nullptr);
 
     ~HierarchicalHeaderView() override;
 
     QSharedPointer<AbstractModelInstance> modelInstance() const;
 
-    void setIdentifierState(const IdentifierState &state);
-
-    void setAppliedAggregation(const Aggregation &appliedAggregation);
-
     void setModel(QAbstractItemModel *model) override;
 
-    ViewHelper::ViewDataType viewType() const;
-    void setViewType(ViewHelper::ViewDataType viewType);
-
-    int view() const;
-    void setView(int view);
+    const QSharedPointer<AbstractViewConfiguration>& viewConfig() const;
 
 public slots:
     void customMenuRequested(const QPoint &position);
-    void resetSymbolLabelFilters();
 
 signals:
-    void filterChanged(const gams::studio::mii::IdentifierState&, Qt::Orientation);
+    void filterChanged();
 
 private slots:
     void on_filterChanged(const gams::studio::mii::IdentifierState& state,
@@ -87,9 +78,7 @@ private:
     class HierarchicalHeaderView_private;
     HierarchicalHeaderView_private *mPrivate;
     QSharedPointer<AbstractModelInstance> mModelInstance;
-    ViewHelper::ViewDataType mViewType = ViewHelper::ViewDataType::Unknown;
-    int mView;
-
+    QSharedPointer<AbstractViewConfiguration> mViewConfig;
     QMenu *mFilterMenu;
     LabelFilterWidget *mFilterWidget;
 };

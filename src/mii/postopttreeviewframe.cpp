@@ -62,8 +62,7 @@ AbstractViewFrame *PostoptTreeViewFrame::clone(int viewId)
                                                                                                         mModelInstance));
     auto frame = new PostoptTreeViewFrame(mModelInstance, viewConfig, parentWidget(), windowFlags());
     frame->setupView();
-    frame->updateFilters(AbstractViewConfiguration::ValueConfig |
-                         AbstractViewConfiguration::IdentifierConfig);
+    frame->evaluateFilters();
     return frame;
 }
 
@@ -101,11 +100,6 @@ ViewHelper::ViewDataType PostoptTreeViewFrame::type() const
     return ViewHelper::ViewDataType::Postopt;
 }
 
-void PostoptTreeViewFrame::updateView()
-{
-
-}
-
 void PostoptTreeViewFrame::zoomIn()
 {
     ui->treeView->zoomIn(ViewHelper::ZoomFactor);
@@ -126,14 +120,10 @@ bool PostoptTreeViewFrame::hasData() const
     return mBaseModel && mBaseModel->rowCount();
 }
 
-void PostoptTreeViewFrame::updateIdentifierFilter()
+void PostoptTreeViewFrame::evaluateFilters()
 {
     mModelInstance->loadViewData(mViewConfig);
     setupView();
-}
-
-void PostoptTreeViewFrame::updateValueFilter()
-{
     if (!mValueFormatModel)
         return;
     mValueFormatModel->setValueFilter(mViewConfig->currentValueFilter());

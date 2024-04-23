@@ -21,7 +21,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS +=                          \
-    testaggregation                 \
     testcommon                      \
     testdatahandler                 \
     testdatamatrix                  \

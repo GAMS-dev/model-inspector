@@ -38,7 +38,7 @@ public:
 
     virtual void setValueFilter(const ValueFilter &valueFilter);
 
-    virtual QVariant data(const QModelIndex &index, int role) const = 0;
+    virtual QVariant data(const QModelIndex &index, int role) const;
 
 protected:
     ValueFilter mValueFilter;
@@ -57,34 +57,6 @@ public:
 
 private:
     QVariant applyFilter(const QVariant &data) const;
-
-private:
-    std::function<double(const QVariant &variant, bool *ok)> getValue;
-};
-
-class JacobianValueFormatProxyModel final : public ValueFormatProxyModel
-{
-    Q_OBJECT
-
-public:
-    JacobianValueFormatProxyModel(QObject *parent = nullptr);
-
-    void setValueFilter(const ValueFilter &valueFilter) override;
-
-    QVariant data(const QModelIndex &index, int role) const override;
-
-private:
-    std::function<double(const QVariant &variant, bool *ok)> getValue;
-};
-
-class BPValueFormatProxyModel final : public ValueFormatProxyModel
-{
-    Q_OBJECT
-
-public:
-    BPValueFormatProxyModel(QObject *parent = nullptr);
-
-    QVariant data(const QModelIndex &index, int role) const override;
 };
 
 class BPValueFormatTypeProxyModel final : public ValueFormatProxyModel
@@ -95,21 +67,6 @@ public:
     BPValueFormatTypeProxyModel(QObject *parent = nullptr);
 
     QVariant data(const QModelIndex &index, int role) const override;
-};
-
-class AbsFormatProxyModel : public QIdentityProxyModel
-{
-    Q_OBJECT
-
-public:
-    AbsFormatProxyModel(QObject *parent = nullptr);
-
-    QVariant data(const QModelIndex &index, int role) const override;
-
-    void setAbsFormat(bool absoluteValues);
-
-private:
-    bool mAbsoluteValues = false;
 };
 
 }

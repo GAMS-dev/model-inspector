@@ -75,11 +75,8 @@ SOURCES += \
     mii/abstracttableview.cpp \
     mii/abstracttableviewframe.cpp \
     mii/abstractviewframe.cpp \
-    mii/aggregation.cpp \
-    mii/aggregationdialog.cpp \
     mii/bpidentifierfiltermodel.cpp \
     mii/bpviewframe.cpp \
-    mii/columnrowfiltermodel.cpp \
     mii/common.cpp \
     mii/comprehensivetablemodel.cpp \
     mii/datahandler.cpp \
@@ -88,8 +85,6 @@ SOURCES += \
     mii/filtertreeitem.cpp \
     mii/filtertreemodel.cpp \
     mii/hierarchicalheaderview.cpp \
-    mii/identifierfiltermodel.cpp \
-    mii/labelfiltermodel.cpp \
     mii/labelfilterwidget.cpp \
     mii/labeltreeitem.cpp \
     mii/modelinstance.cpp    \
@@ -104,8 +99,8 @@ SOURCES += \
     mii/sectiontreeitem.cpp \
     mii/sectiontreemodel.cpp \
     mii/sectiontreeview.cpp \
-    mii/standardtableviewframe.cpp \
     mii/symbol.cpp \
+    mii/symbolfiltermodel.cpp \
     mii/symbolmodelinstancetablemodel.cpp \
     mii/symbolviewframe.cpp \
     mii/valueformatproxymodel.cpp \
@@ -123,11 +118,8 @@ HEADERS += \
     mii/abstracttableview.h \
     mii/abstracttableviewframe.h \
     mii/abstractviewframe.h \
-    mii/aggregation.h \
-    mii/aggregationdialog.h \
     mii/bpidentifierfiltermodel.h \
     mii/bpviewframe.h \
-    mii/columnrowfiltermodel.h \
     mii/common.h \
     mii/comprehensivetablemodel.h \
     mii/datahandler.h \
@@ -136,8 +128,6 @@ HEADERS += \
     mii/filtertreeitem.h \
     mii/filtertreemodel.h \
     mii/hierarchicalheaderview.h \
-    mii/identifierfiltermodel.h \
-    mii/labelfiltermodel.h \
     mii/labelfilterwidget.h \
     mii/labeltreeitem.h \
     mii/modelinstance.h  \
@@ -152,8 +142,8 @@ HEADERS += \
     mii/sectiontreeitem.h \
     mii/sectiontreemodel.h \
     mii/sectiontreeview.h \
-    mii/standardtableviewframe.h \
     mii/symbol.h \
+    mii/symbolfiltermodel.h \
     mii/symbolmodelinstancetablemodel.h \
     mii/symbolviewframe.h \
     mii/valueformatproxymodel.h \
@@ -162,7 +152,6 @@ HEADERS += \
 
 FORMS += \
     mainwindow.ui \
-    mii/aggregationdialog.ui \
     mii/filterdialog.ui \
     mii/labelfilterwidget.ui \
     mii/modelinspector.ui \

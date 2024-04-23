@@ -20,7 +20,6 @@
  */
 #include "datahandler.h"
 #include "abstractmodelinstance.h"
-#include "aggregation.h"
 #include "datamatrix.h"
 #include "postopttreeitem.h"
 #include "viewconfigurationprovider.h"
@@ -47,6 +46,7 @@ protected:
         : mDataHandler(dataHandler)
         , mModelInstance(modelInstance)
         , mViewConfig(viewConfig)
+        , mIsAbsoluteData(viewConfig->currentValueFilter().isAbsolute())
     {
 
     }
@@ -60,6 +60,7 @@ protected:
         , mModelInstance(other.mModelInstance)
         , mLogicalSectionMapping(other.mLogicalSectionMapping)
         , mViewConfig(other.mViewConfig->clone())
+        , mIsAbsoluteData(other.mIsAbsoluteData)
     {
 
     }
@@ -73,6 +74,7 @@ protected:
         , mModelInstance(other.mModelInstance)
         , mLogicalSectionMapping(std::move(other.mLogicalSectionMapping))
         , mViewConfig(std::move(other.mViewConfig))
+        , mIsAbsoluteData(other.mIsAbsoluteData)
     {
         other.mViewConfig = nullptr;
         other.mRowCount = 0;
@@ -150,16 +152,38 @@ public:
         return mSymbolColumnCount;
     }
 
-    virtual int columnEntries(int column) const
+    virtual int columnEntryCount(int column) const
     {
         Q_UNUSED(column);
         return 0;
     }
 
-    virtual int rowEntries(int row) const
+    virtual int rowEntryCount(int row) const
     {
         Q_UNUSED(row);
         return 0;
+    }
+
+    ///
+    /// \brief Returns all non-zero indices.
+    /// \param row Row the indices relate too.
+    /// \return All non-zero indcies for the specified row.
+    ///
+    virtual const QList<int>& rowIndices(int row) const
+    {
+        Q_UNUSED(row);
+        return mRowIndices;
+    }
+
+    ///
+    /// \brief Returns all non-zero indices.
+    /// \param row Column the indices relate too.
+    /// \return All non-zero indcies for the specified column.
+    ///
+    virtual const QList<int>& columnIndices(int column) const
+    {
+        Q_UNUSED(column);
+        return mColumnIndices;
     }
 
     virtual int maxSymbolDimension(Qt::Orientation orientation) const
@@ -173,6 +197,11 @@ public:
         return mViewConfig;
     }
 
+    bool isAbsoluteData() const
+    {
+        return mIsAbsoluteData;
+    }
+
     auto& operator=(const AbstractDataProvider& other)
     {
         mRowCount = other.mRowCount;
@@ -183,6 +212,7 @@ public:
         mModelInstance = other.mModelInstance;
         mLogicalSectionMapping = other.mLogicalSectionMapping;
         mViewConfig = QSharedPointer<AbstractViewConfiguration>(other.mViewConfig->clone());
+        mIsAbsoluteData = other.mIsAbsoluteData;
         return *this;
     }
 
@@ -200,6 +230,7 @@ public:
         mModelInstance = other.mModelInstance;
         mLogicalSectionMapping = std::move(other.mLogicalSectionMapping);
         mViewConfig = std::move(other.mViewConfig);
+        mIsAbsoluteData = other.mIsAbsoluteData;
         return *this;
     }
 
@@ -214,6 +245,9 @@ protected:
     QSharedPointer<AbstractViewConfiguration> mViewConfig;
     double mDataMinimum = std::numeric_limits<double>::lowest();
     double mDataMaximum = std::numeric_limits<double>::max();
+    QList<int> mRowIndices;
+    QList<int> mColumnIndices;
+    bool mIsAbsoluteData;
 };
 
 class IdentityDataProvider : public DataHandler::AbstractDataProvider
@@ -319,6 +353,7 @@ public:
         for (const auto& variable : mModelInstance.variables()) {
             mLogicalSectionMapping[Qt::Horizontal].append(variable->firstSection());
         }
+        mIsAbsoluteData = mViewConfig->currentValueFilter().isAbsolute();
         mViewConfig->currentValueFilter().isAbsolute() ? aggregateAbs() : aggregateId();
     }
 
@@ -433,14 +468,9 @@ private:
         setEmtpyCell(mRowCount-1, mColumnCount-2);
         mDataMatrix[mRowCount-2][mColumnCount-1] = 0.0;
         mDataMatrix[mRowCount-1][mColumnCount-1] = 0.0;
-        if (!mViewConfig->defaultValueFilter().minMaxChanged()) {
-            mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
-            mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
-        }
-        if (mViewConfig->currentValueFilter().PreviousAbsolute != mViewConfig->currentValueFilter().isAbsolute()) {
-            mViewConfig->currentValueFilter().MinValue = mDataMinimum;
-            mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
-        } else if (!mViewConfig->currentValueFilter().minMaxChanged()) {
+        mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
+        mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
+        if (mViewConfig->filterDialogState() != AbstractViewConfiguration::Apply) {
             mViewConfig->currentValueFilter().MinValue = mDataMinimum;
             mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
         }
@@ -518,12 +548,9 @@ private:
         setEmtpyCell(mRowCount-1, mColumnCount-2);
         mDataMatrix[mRowCount-2][mColumnCount-1] = 0.0;
         mDataMatrix[mRowCount-1][mColumnCount-1] = 0.0;
-        if (!mViewConfig->defaultValueFilter().minMaxChanged()) {
-            mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
-            mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
-        }
-        if (mViewConfig->currentValueFilter().PreviousAbsolute != mViewConfig->currentValueFilter().isAbsolute() ||
-            !mViewConfig->currentValueFilter().minMaxChanged() || mViewConfig->currentValueFilter().UseAbsoluteValuesGlobal) {
+        mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
+        mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
+        if (mViewConfig->filterDialogState() != AbstractViewConfiguration::Apply) {
             mViewConfig->currentValueFilter().MinValue = mDataMinimum;
             mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
         }
@@ -548,6 +575,23 @@ private:
 class SymbolsDataProvider final : public DataHandler::AbstractDataProvider
 {
 private:
+    class SymbolColumn
+    {
+    public:
+        inline int entries() const
+        {
+            return mIndices.size();
+        }
+
+        inline QList<int>& indices()
+        {
+            return mIndices;
+        }
+
+    private:
+        QList<int> mIndices;
+    };
+
     class SymbolRow
     {
     public:
@@ -571,6 +615,7 @@ private:
             , mFirstIdx(other.mFirstIdx)
             , mData(other.mData)
             , mNlFlags(other.mNlFlags)
+            , mIndices(std::move(other.mIndices))
         {
             other.mEntries = 0;
             other.mFirstIdx = 0;
@@ -629,6 +674,11 @@ private:
             mNlFlags = nlFlags;
         }
 
+        inline QList<int>& indices()
+        {
+            return mIndices;
+        }
+
         auto& operator=(const SymbolRow& other)
         {
             if (mData) delete [] mData;
@@ -637,6 +687,7 @@ private:
             mFirstIdx = other.mFirstIdx;
             mData = new double[other.mEntries];
             mNlFlags = new int[other.mEntries];
+            mIndices = other.mIndices;
             std::copy(other.mData, other.mData+other.mEntries, mData);
             std::copy(other.mNlFlags, other.mNlFlags+other.mEntries, mNlFlags);
             return *this;
@@ -652,6 +703,7 @@ private:
             other.mData = nullptr;
             mNlFlags = other.mNlFlags;
             other.mNlFlags = nullptr;
+            mIndices = std::move(other.mIndices);
             return *this;
         }
 
@@ -660,6 +712,7 @@ private:
         int mFirstIdx = 0;
         double* mData = nullptr;
         int *mNlFlags = nullptr;
+        QList<int> mIndices;
     };
 
 public:
@@ -674,27 +727,31 @@ public:
 
     SymbolsDataProvider(const SymbolsDataProvider& other)
         : DataHandler::AbstractDataProvider(other)
+        , mRows(new SymbolRow[mRowCount])
+        , mColumns(new SymbolColumn[mColumnCount])
+        , mEqnDimension(other.mEqnDimension)
+        , mVarDimension(other.mVarDimension)
     {
-        mRows = new SymbolRow[mRowCount];
         std::copy(other.mRows, other.mRows+other.mRowCount, mRows);
-        mColumnEntryCount = new int[mColumnCount];
-        std::copy(other.mColumnEntryCount, other.mColumnEntryCount+other.mColumnCount, mColumnEntryCount);
+        std::copy(other.mColumns, other.mColumns+other.mColumnCount, mColumns);
     }
 
     SymbolsDataProvider(SymbolsDataProvider&& other) noexcept
         : DataHandler::AbstractDataProvider(std::move(other))
         , mRows(other.mRows)
-        , mColumnEntryCount(other.mColumnEntryCount)
+        , mColumns(other.mColumns)
+        , mEqnDimension(other.mEqnDimension)
+        , mVarDimension(other.mVarDimension)
     {
         other.mRowCount = 0;
         other.mColumnCount = 0;
         other.mRows = nullptr;
-        other.mColumnEntryCount = nullptr;
+        other.mColumns = nullptr;
     }
 
     ~SymbolsDataProvider()
     {
-        if (mColumnEntryCount) delete [] mColumnEntryCount;
+        if (mColumns) delete [] mColumns;
         if (mRows) delete [] mRows;
     }
 
@@ -728,11 +785,15 @@ public:
                 mLogicalSectionMapping[Qt::Horizontal].append(s);
             }
         }
+        if (mViewConfig->currentValueFilter().isAbsolute()) {
+            value = std::bind(&SymbolsDataProvider::abs, this, std::placeholders::_1);
+        } else {
+            value = std::bind(&SymbolsDataProvider::identity, this, std::placeholders::_1);
+        }
         mColumnCount += mLogicalSectionMapping[Qt::Horizontal].size();
-        mColumnEntryCount = new int[mColumnCount];
-        std::fill(mColumnEntryCount, mColumnEntryCount+mColumnCount, 0);
-        mViewConfig->currentValueFilter().UseAbsoluteValues ? aggregateAbs(equations, variables)
-                                                            : aggregateId(equations, variables);
+        mColumns = new SymbolColumn[mColumnCount];
+        mIsAbsoluteData = mViewConfig->currentValueFilter().UseAbsoluteValues;
+        aggregate(equations, variables);
     }
 
     double data(int row, int column) const override
@@ -757,14 +818,24 @@ public:
         return mRows[row].nlFlags()[column-mRows[row].firstIdx()];
     }
 
-    int columnEntries(int column) const override
+    int columnEntryCount(int column) const override
     {
-        return column < mColumnCount ? mColumnEntryCount[column] : 0;
+        return column < mColumnCount ? mColumns[column].entries() : 0;
     }
 
-    int rowEntries(int row) const override
+    int rowEntryCount(int row) const override
     {
         return row < mRowCount ? mRows[row].entries() : 0;
+    }
+
+    virtual const QList<int>& rowIndices(int row) const override
+    {
+        return row < mRowCount ? mRows[row].indices() : mRowIndices;
+    }
+
+    virtual const QList<int>& columnIndices(int column) const override
+    {
+        return column < mColumnCount ? mColumns[column].indices() : mColumnIndices;
     }
 
     int maxSymbolDimension(Qt::Orientation orientation) const override
@@ -775,11 +846,13 @@ public:
     auto& operator=(const SymbolsDataProvider& other)
     {
         delete [] mRows;
-        delete [] mColumnEntryCount;
+        delete [] mColumns;
         mRows = new SymbolRow[mRowCount];
         std::copy(other.mRows, other.mRows+other.mRowCount, mRows);
-        mColumnEntryCount = new int[mColumnCount];
-        std::copy(other.mColumnEntryCount, other.mColumnEntryCount+other.mColumnCount, mColumnEntryCount);
+        mColumns = new SymbolColumn[mColumnCount];
+        std::copy(other.mColumns, other.mColumns+other.mColumnCount, mColumns);
+        mVarDimension = other.mVarDimension;
+        mEqnDimension = other.mEqnDimension;
         return *this;
     }
 
@@ -787,131 +860,106 @@ public:
     {
         mRows = other.mRows;
         other.mRows = nullptr;
-        mColumnEntryCount = other.mColumnEntryCount;
-        other.mColumnEntryCount = nullptr;
+        mColumns = other.mColumns;
+        other.mColumns = nullptr;
+        mVarDimension = other.mVarDimension;
+        mEqnDimension = other.mEqnDimension;
         return *this;
     }
 
 private:
-    void aggregateAbs(QList<Symbol*>& equations, QList<Symbol*>& variables)
+    void aggregate(QList<Symbol*>& equations, QList<Symbol*>& variables)
     {
         int rr = 0;
         for (auto* equation : equations) {
             for (int r=equation->firstSection(); r<=equation->lastSection(); ++r, ++rr) {
                 auto sparseRow = dataRow(r);
                 auto data = mModelInstance.useOutput() ? sparseRow->outputData() : sparseRow->inputData();
-                int sym_nz = 0, start_i = -1, start_c = 0, end_c = 0;
+                int sparseIdx = 0;
+                int variableEntries = 0;
+                QList<int> sparseIndicies, rIndices;
                 for (auto variable : variables) {
-                    for (int i=0; i<sparseRow->entries(); ++i) {
-                        if (sparseRow->colIdx()[i] > variable->lastSection()) {
+                    variableEntries += variable->entries();
+                    for (; sparseIdx<sparseRow->entries(); ++sparseIdx) {
+                        if (sparseRow->colIdx()[sparseIdx] > variable->lastSection()) {
                             break;
                         }
-                        if (sparseRow->colIdx()[i] < variable->firstSection()) {
+                        if (sparseRow->colIdx()[sparseIdx] < variable->firstSection()) {
                             continue;
                         }
-                        if (start_i < 0) {
-                            start_c = sparseRow->colIdx()[i];
-                            start_i = i;
+                        if (acceptValue(value(data[sparseIdx]))) {
+                            sparseIndicies.append(sparseIdx);
+                            rIndices.append(sparseRow->colIdx()[sparseIdx] - variable->firstSection());
                         }
-                        end_c = sparseRow->colIdx()[i];
-                        ++sym_nz;
                     }
                 }
-                if (!sym_nz) continue;
+                if (sparseIndicies.isEmpty())
+                    continue;
+                auto firstIdx = sparseRow->colIdx()[sparseIndicies.first()];
+                auto lastIdx = sparseRow->colIdx()[sparseIndicies.last()];
+                auto firstSection = variables.first()->firstSection();
                 SymbolRow* row = &mRows[rr];
-                row->setEntries(end_c + 1 - start_c);
+                row->setEntries(lastIdx - firstIdx + 1);
                 row->setData(new double[row->entries()]);
                 row->setNlFlags(new int[row->entries()]);
-                row->setFirstIdx(start_c - variables.first()->firstSection());
-                if (sym_nz == row->entries()) {
-                    for (int nz=start_i, c=0; nz<start_i+sym_nz; ++nz, ++c) {
-                        row->data()[c] = std::abs(data[nz]);
-                        row->nlFlags()[c] = sparseRow->nlFlags()[nz];
-                        mDataMinimum = std::min(mDataMinimum, row->data()[c]);
-                        mDataMaximum = std::max(mDataMaximum, row->data()[c]);
-                        ++mColumnEntryCount[row->firstIdx()+c];
+                row->setFirstIdx(firstIdx - firstSection);
+                row->indices() = std::move(rIndices);
+                if (variableEntries == sparseIndicies.size()) {
+                    for (auto idx : sparseIndicies) {
+                        int column = sparseRow->colIdx()[idx] - firstSection;
+                        row->data()[column] = value(data[idx]);
+                        row->nlFlags()[column] = sparseRow->nlFlags()[idx];
+                        mDataMinimum = std::min(mDataMinimum, row->data()[idx]);
+                        mDataMaximum = std::max(mDataMaximum, row->data()[idx]);
+                        mColumns[column].indices().append(rr);
                     }
                 } else {
                     std::fill(row->data(), row->data()+row->entries(), 0.0);
                     std::fill(row->nlFlags(), row->nlFlags()+row->entries(), 0);
-                    for (int nz=start_i, c=0; nz<start_i+sym_nz; ++nz) {
-                        c = sparseRow->colIdx()[nz] - start_c;
-                        row->data()[c] = std::abs(data[nz]);
-                        row->nlFlags()[c] = sparseRow->nlFlags()[nz];
-                        mDataMinimum = std::min(mDataMinimum, row->data()[c]);
-                        mDataMaximum = std::max(mDataMaximum, row->data()[c]);
-                        ++mColumnEntryCount[row->firstIdx()+c];
+                    for (auto idx : sparseIndicies) {
+                        int column = sparseRow->colIdx()[idx] - firstIdx;
+                        row->data()[column] = value(data[idx]);
+                        row->nlFlags()[column] = sparseRow->nlFlags()[idx];
+                        mDataMinimum = std::min(mDataMinimum, row->data()[idx]);
+                        mDataMaximum = std::max(mDataMaximum, row->data()[idx]);
+                        mColumns[sparseRow->colIdx()[idx] - firstSection].indices().append(rr);
                     }
                 }
             }
         }
-        mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
-        mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
-        mViewConfig->currentValueFilter().MinValue = mDataMinimum;
-        mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        if (mViewConfig->defaultValueFilter().MinValue == std::numeric_limits<double>::lowest() ||
+            mViewConfig->defaultValueFilter().MaxValue == std::numeric_limits<double>::max()) {
+            mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
+            mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
+        }
+        if (mViewConfig->filterDialogState() != AbstractViewConfiguration::Apply) {
+            mViewConfig->currentValueFilter().MinValue = mDataMinimum;
+            mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        }
     }
 
-    void aggregateId(QList<Symbol*>& equations, QList<Symbol*>& variables)
+    inline double abs(double value)
     {
-        int rr = 0;
-        for (auto* equation : equations) {
-            for (int r=equation->firstSection(); r<=equation->lastSection(); ++r, ++rr) {
-                auto sparseRow = dataRow(r);
-                auto data = mModelInstance.useOutput() ? sparseRow->outputData() : sparseRow->inputData();
-                int sym_nz = 0, start_i = -1, start_c = 0, end_c = 0;
-                for (auto variable : variables) {
-                    for (int i=0; i<sparseRow->entries(); ++i) {
-                        if (sparseRow->colIdx()[i] > variable->lastSection()) {
-                            break;
-                        }
-                        if (sparseRow->colIdx()[i] < variable->firstSection()) {
-                            continue;
-                        }
-                        if (start_i < 0) {
-                            start_c = sparseRow->colIdx()[i];
-                            start_i = i;
-                        }
-                        end_c = sparseRow->colIdx()[i];
-                        ++sym_nz;
-                    }
-                }
-                if (!sym_nz) continue;
-                SymbolRow* row = &mRows[rr];
-                row->setEntries(end_c + 1 - start_c);
-                row->setData(new double[row->entries()]);
-                row->setNlFlags(new int[row->entries()]);
-                row->setFirstIdx(start_c - variables.first()->firstSection());
-                if (sym_nz == row->entries()) {
-                    for (int nz=start_i, c=0; nz<start_i+sym_nz; ++nz, ++c) {
-                        row->data()[c] = data[nz];
-                        row->nlFlags()[c] = sparseRow->nlFlags()[nz];
-                        mDataMinimum = std::min(mDataMinimum, row->data()[c]);
-                        mDataMaximum = std::max(mDataMaximum, row->data()[c]);
-                        ++mColumnEntryCount[row->firstIdx()+c];
-                    }
-                } else {
-                    std::fill(row->data(), row->data()+row->entries(), 0.0);
-                    std::fill(row->nlFlags(), row->nlFlags()+row->entries(), 0);
-                    for (int nz=start_i, c=0; nz<start_i+sym_nz; ++nz) {
-                        c = sparseRow->colIdx()[nz] - start_c;
-                        row->data()[c] = data[nz];
-                        row->nlFlags()[c] = sparseRow->nlFlags()[nz];
-                        mDataMinimum = std::min(mDataMinimum, row->data()[c]);
-                        mDataMaximum = std::max(mDataMaximum, row->data()[c]);
-                        ++mColumnEntryCount[row->firstIdx()+c];
-                    }
-                }
-            }
+        return std::abs(value);
+    }
+
+    inline double identity(double value)
+    {
+        return value;
+    }
+
+    bool acceptValue(double value)
+    {
+        if (mViewConfig->currentValueFilter().ExcludeRange) {
+            return (value < mViewConfig->currentValueFilter().MinValue || value > mViewConfig->currentValueFilter().MaxValue);
         }
-        mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
-        mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
-        mViewConfig->currentValueFilter().MinValue = mDataMinimum;
-        mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        return (value >= mViewConfig->currentValueFilter().MinValue && value <= mViewConfig->currentValueFilter().MaxValue);
     }
 
 private:
     SymbolRow* mRows = nullptr;
-    int* mColumnEntryCount = nullptr;
+    SymbolColumn* mColumns = nullptr;
+    std::function<double(double)> value;
     int mEqnDimension = 0;
     int mVarDimension = 0;
 };
@@ -1261,8 +1309,10 @@ public:
         }
         mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
         mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
-        mViewConfig->currentValueFilter().MinValue = mDataMinimum;
-        mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        if (mViewConfig->filterDialogState() != AbstractViewConfiguration::Apply) {
+            mViewConfig->currentValueFilter().MinValue = mDataMinimum;
+            mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        }
         delete [] lowerBounds;
         delete [] upperBounds;
     }
@@ -1479,8 +1529,10 @@ public:
         }
         mViewConfig->defaultValueFilter().MinValue = mDataMinimum;
         mViewConfig->defaultValueFilter().MaxValue = mDataMaximum;
-        mViewConfig->currentValueFilter().MinValue = mDataMinimum;
-        mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        if (mViewConfig->filterDialogState() != AbstractViewConfiguration::Apply) {
+            mViewConfig->currentValueFilter().MinValue = mDataMinimum;
+            mViewConfig->currentValueFilter().MaxValue = mDataMaximum;
+        }
         delete [] lowerBounds;
         delete [] upperBounds;
     }
@@ -1716,7 +1768,7 @@ private:
                 if (jacval.isValid()) {
                     auto name = symbolName(equation, e);
                     double jac = value(jacval.toDouble());
-                    double xi = mModelInstance.equationAttribute(AttributeHelper::MarginalNumText, equation->firstSection(), e, abs).toDouble();
+                    double xi = value(mModelInstance.equationAttribute(AttributeHelper::MarginalNumText, equation->firstSection(), e, abs).toDouble());
                     double jacxi = value(jacval.toDouble() * xi);
                     eqnGroup->append(new LinePostoptTreeItem({name, jac, xi, jacxi}, eqnGroup));
                 }
@@ -1753,7 +1805,7 @@ private:
                 if (jacval.isValid()) {
                     auto name = symbolName(variable, e);
                     double jac = value(jacval.toDouble());
-                    double ui = mModelInstance.variableAttribute(AttributeHelper::LevelText, variable->firstSection(), e, abs).toDouble();
+                    double ui = value(mModelInstance.variableAttribute(AttributeHelper::LevelText, variable->firstSection(), e, abs).toDouble());
                     double jacui = value(jac * ui);
                     varGroup->append(new LinePostoptTreeItem({name, jac, ui, jacui}, varGroup));
                 }
@@ -1832,23 +1884,15 @@ DataHandler::~DataHandler()
 
 }
 
-void DataHandler::aggregate(const QSharedPointer<AbstractViewConfiguration> &viewConfig)
-{
-    if (!viewConfig) return;
-    auto provider = newProvider(viewConfig);
-    mDataCache.remove(viewConfig->viewId());
-    if (viewConfig->currentAggregation().type() != Aggregation::None) {
-        provider->loadData();
-    } else {
-        return;
-    }
-    mDataCache[viewConfig->viewId()] = provider;
-}
-
 void DataHandler::loadData(const QSharedPointer<AbstractViewConfiguration> &viewConfig)
 {
     if (!viewConfig)
         return;
+    if (viewConfig->viewType() == ViewHelper::ViewDataType::BP_Scaling &&
+        mDataCache.contains(viewConfig->viewId()) &&
+        mDataCache[viewConfig->viewId()]->isAbsoluteData() == viewConfig->currentValueFilter().isAbsolute()) {
+        return;
+    }
     auto provider = newProvider(viewConfig);
     mDataCache.remove(viewConfig->viewId());
     provider->loadData();
@@ -1918,9 +1962,9 @@ int DataHandler::rowCount(int viewId) const
     return 0;
 }
 
-int DataHandler::rowEntries(int row, int viewId) const
+int DataHandler::rowEntryCount(int row, int viewId) const
 {
-    return mDataCache.contains(viewId) ? mDataCache[viewId]->rowEntries(row) : 0;
+    return mDataCache.contains(viewId) ? mDataCache[viewId]->rowEntryCount(row) : 0;
 }
 
 int DataHandler::columnCount(int viewId) const
@@ -1931,9 +1975,19 @@ int DataHandler::columnCount(int viewId) const
     return 0;
 }
 
-int DataHandler::columnEntries(int column, int viewId) const
+int DataHandler::columnEntryCount(int column, int viewId) const
 {
-    return mDataCache.contains(viewId) ? mDataCache[viewId]->columnEntries(column) : 0;
+    return mDataCache.contains(viewId) ? mDataCache[viewId]->columnEntryCount(column) : 0;
+}
+
+const QList<int> &DataHandler::rowIndices(int viewId, int row) const
+{
+    return mDataCache.contains(viewId) ? mDataCache[viewId]->rowIndices(row) : mDummyIndices;
+}
+
+const QList<int> &DataHandler::columnIndices(int viewId, int column) const
+{
+    return mDataCache.contains(viewId) ? mDataCache[viewId]->columnIndices(column) : mDummyIndices;
 }
 
 int DataHandler::symbolRowCount(int viewId) const

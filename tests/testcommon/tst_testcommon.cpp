@@ -36,14 +36,12 @@ private slots:
 
     void test_default_identifierState();
     void test_getSet_identifierState();
-    void test_unite_identifierState();
     void test_operators_identifierState();
 
     void test_labelFilter();
 
     void test_default_valueFilter();
     void test_getSet_valueFilter();
-    void test_minMaxChanged_valueFilter();
 
     void test_AttributeHelper_attributeText();
     void test_AttributeHelper_attributeValue();
@@ -140,9 +138,8 @@ void TestCommon::test_default_identifierState()
     QCOMPARE(state.SymbolIndex, -1);
     QCOMPARE(state.Text, QString());
     QCOMPARE(state.Checked, Qt::Unchecked);
-    QCOMPARE(state.CheckStates, IndexCheckStates());
+    QCOMPARE(state.CheckStates, QSet<int>());
     QVERIFY(!state.isValid());
-    QVERIFY(!state.disabled());
 }
 
 void TestCommon::test_getSet_identifierState()
@@ -164,29 +161,11 @@ void TestCommon::test_getSet_identifierState()
     state.Checked = Qt::Checked;
     QCOMPARE(state.Checked, Qt::Checked);
 
-    IndexCheckStates checkStates { { 0, Qt::Unchecked },
-                                  { 0, Qt::Unchecked },
-                                  { 0, Qt::Unchecked } };
+    QSet<int> checkStates { 1,  2, 3 };
     state.CheckStates = checkStates;
     QCOMPARE(state.CheckStates, checkStates);
 
     QVERIFY(state.isValid());
-    QVERIFY(state.disabled());
-}
-
-void TestCommon::test_unite_identifierState()
-{
-    IdentifierState state_1;
-    IndexCheckStates checkStates { { 0, Qt::Unchecked },
-                                  { 0, Qt::Unchecked },
-                                  { 0, Qt::Unchecked } };
-    IdentifierState state_2;
-    state_2.SectionIndex = 4;
-    state_2.CheckStates = checkStates;
-
-    state_1.unite(state_2);
-    QCOMPARE(state_1.SectionIndex, 4);
-    QCOMPARE(state_1.CheckStates, checkStates);
 }
 
 void TestCommon::test_operators_identifierState()
@@ -197,9 +176,7 @@ void TestCommon::test_operators_identifierState()
     state.SymbolIndex = 2;
     state.Text = "x";
     state.Checked = Qt::Checked;
-    IndexCheckStates checkStates { { 0, Qt::Unchecked },
-                                 { 0, Qt::Unchecked },
-                                 { 0, Qt::Unchecked } };
+    QSet<int> checkStates { 1, 2, 3, 4 };
     state.CheckStates = checkStates;
 
     QCOMPARE(IdentifierState(), IdentifierState());
@@ -225,7 +202,8 @@ void TestCommon::test_labelFilter()
     QVERIFY(states != LabelCheckStates());
 
     LabelFilter labelFilter { true,
-                              { { Qt::Horizontal, states } } };
+                              { { Qt::Horizontal, states } },
+                              QMap<Qt::Orientation, QStringList>() };
     QCOMPARE(labelFilter.Any, true);
     QCOMPARE(labelFilter.LabelCheckStates[Qt::Horizontal], states);
     QCOMPARE(labelFilter, labelFilter);
@@ -281,20 +259,6 @@ void TestCommon::test_getSet_valueFilter()
     QVERIFY(!filter.accepts(ValueHelper::PINFText));
     QVERIFY(filter.accepts(1001.2));
     QVERIFY(!filter.accepts(-42));
-}
-
-void TestCommon::test_minMaxChanged_valueFilter()
-{
-    ValueFilter filter;
-    QCOMPARE(filter.minMaxChanged(), false);
-    filter.MinValue = 0;
-    QCOMPARE(filter.minMaxChanged(), true);
-    filter.MinValue = std::numeric_limits<double>::lowest();
-    filter.MaxValue = 0;
-    QCOMPARE(filter.minMaxChanged(), true);
-    filter.MinValue = std::numeric_limits<double>::lowest();
-    filter.MaxValue = std::numeric_limits<double>::max();
-    QCOMPARE(filter.minMaxChanged(), false);
 }
 
 void TestCommon::test_AttributeHelper_attributeText()

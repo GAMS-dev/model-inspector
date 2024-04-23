@@ -21,8 +21,8 @@
 #ifndef VIEWCONFIGURATIONPROVIDER_H
 #define VIEWCONFIGURATIONPROVIDER_H
 
-#include "aggregation.h"
 #include "common.h"
+#include "symbol.h"
 
 class QAbstractItemModel;
 
@@ -36,13 +36,12 @@ class AbstractModelInstance;
 class AbstractViewConfiguration
 {
 public:
-    enum Option {
-        AggregationConfig   = 0x01,
-        IdentifierConfig    = 0x02,
-        LabelConfig         = 0x04,
-        ValueConfig         = 0x08
+    enum FilterDialogState
+    {
+        None,
+        Apply,
+        Reset
     };
-    Q_DECLARE_FLAGS(Options, Option)
 
     AbstractViewConfiguration(ViewHelper::ViewDataType viewType,
                               const QSharedPointer<AbstractModelInstance> &modelInstance = nullptr);
@@ -76,34 +75,19 @@ public:
         return mViewType;
     }
 
+    inline FilterDialogState filterDialogState() const
+    {
+        return mFilterDialogState;
+    }
+
+    inline void setFilterDialogState(FilterDialogState state)
+    {
+        mFilterDialogState = state;
+    }
+
     AbstractViewFrame* view() const;
 
     void setView(AbstractViewFrame* view);
-
-    Aggregation& currentAggregation()
-    {
-        return mCurrentAggregation;
-    }
-
-    void setCurrentAggregation(const Aggregation& aggregation)
-    {
-        mCurrentAggregation = aggregation;
-    }
-
-    Aggregation& defaultAggregation()
-    {
-        return mDefaultAggregation;
-    }
-
-    void setDefaultAggregation(const Aggregation& aggregation)
-    {
-        mDefaultAggregation = aggregation;
-    }
-
-    void resetAggregation()
-    {
-        mCurrentAggregation = mDefaultAggregation;
-    }
 
     LabelFilter& currentLabelFiler()
     {
@@ -236,19 +220,16 @@ protected:
     ValueFilter mCurrentValueFilter;
     ValueFilter mDefaultValueFilter;
 
-    Aggregation mCurrentAggregation;
-    Aggregation mDefaultAggregation;
-
     LabelCheckStates mCurrentAttributeFilter;
     LabelCheckStates mDefaultAttributeFilter;
+
+    FilterDialogState mFilterDialogState = None;
 
 private:
     int mViewId;
     ViewHelper::ViewDataType mViewType;
     AbstractViewFrame* mView = nullptr;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractViewConfiguration::Options)
 
 class ViewConfigurationProvider final
 {

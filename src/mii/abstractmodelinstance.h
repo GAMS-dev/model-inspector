@@ -166,11 +166,15 @@ public:
 
     virtual int rowCount(int view) const = 0;
 
-    virtual int rowEntries(int row, int view) const = 0;
+    virtual int rowEntryCount(int row, int view) const = 0;
 
     virtual int columnCount(int view) const = 0;
 
-    virtual int columnEntries(int column, int view) const = 0;
+    virtual const QList<int>& rowIndices(int viewId, int row) const = 0;
+
+    virtual const QList<int>& columnIndices(int viewId, int column) const = 0;
+
+    virtual int columnEntryCount(int column, int view) const = 0;
 
     virtual int symbolRowCount(int view) const = 0;
 
@@ -178,7 +182,7 @@ public:
 
     virtual QSharedPointer<AbstractViewConfiguration> clone(int view, int newView) = 0;
 
-    virtual void loadViewData(QSharedPointer<AbstractViewConfiguration> viewConfig) = 0;
+    virtual void loadViewData(const QSharedPointer<AbstractViewConfiguration>& viewConfig) = 0;
 
     virtual QVariant data(int row, int column, int view) const = 0;
 
@@ -265,11 +269,15 @@ public:
 
     int rowCount(int view) const override;
 
-    int rowEntries(int row, int view) const override;
+    int rowEntryCount(int row, int view) const override;
 
     int columnCount(int view) const override;
 
-    int columnEntries(int column, int view) const override;
+    int columnEntryCount(int column, int view) const override;
+
+    const QList<int>& rowIndices(int viewId, int row) const override;
+
+    const QList<int>& columnIndices(int viewId, int column) const override;
 
     int symbolRowCount(int view) const override;
 
@@ -277,7 +285,7 @@ public:
 
     QSharedPointer<AbstractViewConfiguration> clone(int view, int newView) override;
 
-    void loadViewData(QSharedPointer<AbstractViewConfiguration> viewConfig) override;
+    void loadViewData(const QSharedPointer<AbstractViewConfiguration>& viewConfig) override;
 
     QVariant data(int row, int column, int view) const override;
 
@@ -302,6 +310,7 @@ public:
 private:
     QVector<Symbol*> mSymbols;
     QSharedPointer<PostoptTreeItem> mRootItem;
+    QList<int> mIndices;
 };
 
 }

@@ -98,7 +98,7 @@ LabelTreeItem* LabelTreeItem::clone(LabelTreeItem* newParent) const
 
 bool LabelTreeItem::hasChildren() const
 {
-    return mChilds.size();
+    return !mChilds.isEmpty();
 }
 
 bool LabelTreeItem::isRoot() const

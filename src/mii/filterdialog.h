@@ -93,10 +93,9 @@ private:
     void applyCheckState(QTreeView* view,
                          QSortFilterProxyModel *model,
                          Qt::CheckState state);
-    IdentifierStates applyHeaderFilter(QSortFilterProxyModel *model);
+    IdentifierStates applyHeaderFilter(Qt::Orientation orientation, QSortFilterProxyModel *model);
     void applyValueFilter();
-    LabelCheckStates applyLabelFilter(Qt::Orientation orientation,
-                                      QSortFilterProxyModel *model);
+    void applyLabelFilter(Qt::Orientation orientation, QSortFilterProxyModel *model);
 
     LabelCheckStates applyAttributeFilter(QSortFilterProxyModel *model);
 

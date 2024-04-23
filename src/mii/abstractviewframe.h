@@ -52,10 +52,6 @@ public:
 
     virtual ViewHelper::ViewDataType type() const = 0;
 
-    void updateFilters(AbstractViewConfiguration::Options options);
-
-    virtual void updateView() = 0;
-
     virtual void zoomIn() = 0;
 
     virtual void zoomOut() = 0;
@@ -76,12 +72,8 @@ public:
 
     virtual bool hasData() const = 0;
 
-protected:
-    virtual void updateIdentifierFilter();
-
-    virtual void updateLabelFilter();
-
-    virtual void updateValueFilter();
+public slots:
+    virtual void evaluateFilters();
 
 protected:
     QSharedPointer<AbstractModelInstance> mModelInstance;
@@ -108,8 +100,6 @@ public:
     void setShowAbsoluteValues(bool absoluteValues) override;
 
     ViewHelper::ViewDataType type() const override;
-
-    void updateView() override;
 
     void zoomIn() override;
 

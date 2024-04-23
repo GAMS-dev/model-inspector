@@ -396,11 +396,6 @@ typedef QHash<int, QStringList> SectionLabels;
 typedef QVector<QSet<int>> UnitedSections;
 
 ///
-/// \brief Check state by index, like dimension or section index.
-///
-typedef QMap<int, Qt::CheckState> IndexCheckStates;
-
-///
 /// \brief Check states by label.
 ///
 typedef QHash<QString, Qt::CheckState> LabelCheckStates;
@@ -452,30 +447,13 @@ struct IdentifierState
 
     QString Text;
     Qt::CheckState Checked = Qt::Unchecked;
-    IndexCheckStates CheckStates;
+    QSet<int> CheckStates;
 
     bool isValid() const
     {
         return SectionIndex != -1 &&
                 SymbolIndex != -1 &&
                 !CheckStates.isEmpty();
-    }
-
-    ///
-    /// \brief Returns if all labels are disabled.
-    /// \return <c>true</c> if all visible labels are disabled; otherwise <c>false</c>.
-    ///
-    bool disabled() const
-    {
-        Q_FOREACH(auto state, CheckStates)
-            if (state == Qt::Checked) return false;
-        return !CheckStates.isEmpty();
-    }
-
-    void unite(const IdentifierState &other)
-    {
-        CheckStates = other.CheckStates;
-        SectionIndex = other.SectionIndex;
     }
 
     bool operator==(const IdentifierState& other) const
@@ -504,6 +482,8 @@ struct LabelFilter
     bool Any = false;
     LabelStates LabelCheckStates;
 
+    QMap<Qt::Orientation, QStringList> UncheckedLabels;
+
     bool operator==(const LabelFilter& other) const
     {
         return Any == other.Any &&
@@ -523,7 +503,6 @@ struct ValueFilter
     bool ExcludeRange = false;
     bool UseAbsoluteValues = false;
     bool UseAbsoluteValuesGlobal = false;
-    bool PreviousAbsolute = false;
 
     bool ShowPInf = true;
     bool ShowNInf = true;
@@ -532,12 +511,6 @@ struct ValueFilter
     bool isAbsolute() const
     {
         return UseAbsoluteValues || UseAbsoluteValuesGlobal;
-    }
-
-    bool minMaxChanged() const
-    {
-        return MinValue != std::numeric_limits<double>::lowest() ||
-               MaxValue != std::numeric_limits<double>::max();
     }
 
     bool accepts(const QVariant &value) const

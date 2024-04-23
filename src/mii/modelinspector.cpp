@@ -130,8 +130,6 @@ void ModelInspector::setShowAbsoluteValuesGlobal(bool absoluteValues)
         return;
     mModelInstance->setGlobalAbsolute(absoluteValues);
     for (auto widget : mSectionModel->rootItem()->widgets()) {
-        widget->viewConfig()->currentAggregation().setUseAbsoluteValues(absoluteValues);
-        widget->viewConfig()->currentValueFilter().PreviousAbsolute = widget->viewConfig()->currentValueFilter().isAbsolute();
         widget->viewConfig()->currentValueFilter().UseAbsoluteValues = absoluteValues;
         widget->viewConfig()->currentValueFilter().UseAbsoluteValuesGlobal = absoluteValues;
         widget->setShowAbsoluteValues(absoluteValues);
@@ -161,7 +159,7 @@ void ModelInspector::loadModelInstance(bool loadModel)
     mSectionModel->clearModelData();
     mSectionModel->setScratchDir(mBaseScratchDir);
     mSectionModel->loadModelData(ui->stackedWidget, mMiiMode, mModelFilePath);
-    if (mSectionModel->rootItem()->childs().size() && mMiiMode == ViewHelper::MiiModeType::Multi) {
+    if (!mSectionModel->rootItem()->childs().isEmpty() && mMiiMode == ViewHelper::MiiModeType::Multi) {
         auto scrDir = mSectionModel->rootItem()->childs().first()->scratchDir();
         setScratchDir(scrDir);
     }
@@ -247,9 +245,7 @@ void ModelInspector::updateFilters()
 {
     auto frame = currentView();
     if (frame) {
-        frame->updateFilters(AbstractViewConfiguration::ValueConfig |
-                             AbstractViewConfiguration::LabelConfig |
-                             AbstractViewConfiguration::IdentifierConfig);
+        frame->evaluateFilters();
         emit filtersChanged();
     }
 }
@@ -280,9 +276,12 @@ void ModelInspector::saveModelView()
                 this, &ModelInspector::createNewSymbolView);
         break;
     case ViewHelper::ViewDataType::Postopt:
-        dataType = clone->type();
+        dataType = ViewHelper::ViewDataType::PostoptGroup;
         connect(static_cast<PostoptTreeViewFrame*>(clone), &PostoptTreeViewFrame::openFilterDialog,
                 this, &ModelInspector::openFilterDialog);
+        break;
+    case ViewHelper::ViewDataType::Symbols:
+        dataType = ViewHelper::ViewDataType::SymbolsGroup;
         break;
     default:
         dataType = clone->type();
@@ -340,7 +339,7 @@ void ModelInspector::createNewSymbolView()
         setCurrentViewIndex(ViewHelper::ViewType::Custom, ViewHelper::ViewDataType::SymbolsGroup);
         connect(view, &SymbolViewFrame::filtersChanged,
                 this, &ModelInspector::filtersChanged);
-        view->updateView();
+        emit view->filtersChanged();
     }
 }
 
@@ -409,8 +408,9 @@ void ModelInspector::setCurrentViewIndex(ViewHelper::ViewType viewType,
             break;
         }
     }
-    if (index.isValid())
+    if (index.isValid()) {
         ui->sectionView->setCurrentIndex(index);
+    }
 }
 
 void ModelInspector::setSearchSelection(const gams::studio::mii::SearchResult::SearchEntry &result)

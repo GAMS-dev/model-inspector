@@ -12,7 +12,6 @@ SOURCES +=  tst_testdatahandler.cpp                      \
             $$SRCPATH/mii/datamatrix.cpp                 \
             $$SRCPATH/mii/modelinstance.cpp              \
             $$SRCPATH/mii/abstractmodelinstance.cpp      \
-            $$SRCPATH/mii/aggregation.cpp                \
             $$SRCPATH/mii/symbol.cpp                     \
             $$SRCPATH/mii/labeltreeitem.cpp              \
             $$SRCPATH/mii/viewconfigurationprovider.cpp  \

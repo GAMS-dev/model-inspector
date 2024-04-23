@@ -94,15 +94,19 @@ public:
 
     void loadBaseData() override;
 
-    void loadViewData(QSharedPointer<AbstractViewConfiguration> viewConfig) override;
+    void loadViewData(const QSharedPointer<AbstractViewConfiguration> &viewConfig) override;
 
     int rowCount(int viewId) const override;
 
-    int rowEntries(int row, int viewId) const override;
+    int rowEntryCount(int row, int viewId) const override;
 
     int columnCount(int viewId) const override;
 
-    int columnEntries(int column, int viewId) const override;
+    int columnEntryCount(int column, int viewId) const override;
+
+    const QList<int>& rowIndices(int viewId, int row) const override;
+
+    const QList<int>& columnIndices(int viewId, int column) const override;
 
     int symbolRowCount(int viewId) const override;
 

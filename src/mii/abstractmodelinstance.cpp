@@ -289,7 +289,7 @@ int EmptyModelInstance::rowCount(int view) const
     return 0;
 }
 
-int EmptyModelInstance::rowEntries(int row, int view) const
+int EmptyModelInstance::rowEntryCount(int row, int view) const
 {
     Q_UNUSED(row);
     Q_UNUSED(view);
@@ -302,11 +302,25 @@ int EmptyModelInstance::columnCount(int view) const
     return 0;
 }
 
-int EmptyModelInstance::columnEntries(int column, int view) const
+int EmptyModelInstance::columnEntryCount(int column, int view) const
 {
     Q_UNUSED(column);
     Q_UNUSED(view);
     return 0;
+}
+
+const QList<int> &EmptyModelInstance::rowIndices(int viewId, int row) const
+{
+    Q_UNUSED(row);
+    Q_UNUSED(viewId);
+    return mIndices;
+}
+
+const QList<int> &EmptyModelInstance::columnIndices(int viewId, int column) const
+{
+    Q_UNUSED(column);
+    Q_UNUSED(viewId);
+    return mIndices;
 }
 
 int EmptyModelInstance::symbolRowCount(int view) const
@@ -328,7 +342,7 @@ QSharedPointer<AbstractViewConfiguration> EmptyModelInstance::clone(int view, in
     return nullptr;
 }
 
-void EmptyModelInstance::loadViewData(QSharedPointer<AbstractViewConfiguration> viewConfig)
+void EmptyModelInstance::loadViewData(const QSharedPointer<AbstractViewConfiguration> &viewConfig)
 {
     Q_UNUSED(viewConfig);
 }

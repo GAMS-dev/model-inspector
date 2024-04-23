@@ -23,7 +23,6 @@
 #include "commonpaths.h"
 #include "gamsprocess.h"
 #include "gamslibprocess.h"
-#include "mii/aggregationdialog.h"
 #include "mii/filterdialog.h"
 #include "mii/modelinspector.h"
 #include "mii/searchresultmodel.h"
@@ -38,7 +37,6 @@
 #include <QDebug>
 
 using namespace gams::studio;
-using gams::studio::mii::AggregationDialog;
 using gams::studio::mii::FilterDialog;
 using gams::studio::mii::ModelInspector;
 using gams::studio::mii::SearchResultModel;
@@ -50,9 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , mLibProcess(new GAMSLibProcess(this))
     , mProcess(new GAMSProcess(this))
-    , mAggregationDialog(new AggregationDialog(this))
     , mFilterDialog(new FilterDialog(this))
-    , mAggregationStatusLabel(new QLabel(QString(), this))
     , mScrWatcher(this)
 {
     ui->setupUi(this);
@@ -60,10 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->modelInspector->setSystemDirectory(CommonPaths::systemDir());
     ui->paramsEdit->setText(QString("MIIMode=singleMI scrdir=%1/scratch").arg(workspace()));
     ui->searchResultView->setModel(new SearchResultModel(ui->searchResultView));
-    ui->statusBar->addPermanentWidget(mAggregationStatusLabel);
     ui->actionAggregation->setEnabled(false);
     setWindowTitle(windowTitle() + " " + QApplication::applicationVersion());
-    mAggregationStatusLabel->setText(mAggregationDialog->viewConfig()->currentAggregation().typeText());
     setupConnections();
     setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
     createProjectDirectory();
@@ -108,7 +102,7 @@ void MainWindow::on_actionOpen_triggered()
     ui->logEdit->appendPlainText("Loading scratch data from: " + fi.dir().path());
     if (ui->modelEdit->text().endsWith(".dat")) {
         auto dir = fi.dir().path();
-        ui->paramsEdit->setText(QString("MIIMode=multiMI scrdir=%1").arg(dir));
+        ui->paramsEdit->setText(QString("MIIMode=singleMI scrdir=%1").arg(dir));
     }
 }
 
@@ -201,12 +195,6 @@ void MainWindow::on_actionFilters_triggered()
     showDialog(mFilterDialog);
 }
 
-void MainWindow::on_actionAggregation_triggered()
-{
-    setAggregationData();
-    showDialog(mAggregationDialog);
-}
-
 void MainWindow::on_actionShow_search_result_triggered()
 {
     ui->dockWidget->show();
@@ -216,7 +204,6 @@ void MainWindow::showAbsoluteValues()
 {
     ui->modelInspector->setShowAbsoluteValuesGlobal(ui->actionShow_Absolute->isChecked());
     setGlobalFiltersData();
-    setAggregationData();
 }
 
 void MainWindow::on_actionShow_Output_triggered()
@@ -289,12 +276,6 @@ void MainWindow::handleLibProcessResult(int exitCode, QProcess::ExitStatus exitS
     }
 }
 
-void MainWindow::aggregationUpdate()
-{
-    static_cast<SearchResultModel*>(ui->searchResultView->model())->updateData({});
-    mAggregationStatusLabel->setText(mAggregationDialog->viewConfig()->currentAggregation().typeText());
-}
-
 void MainWindow::viewConfigUpdate()
 {
     static_cast<SearchResultModel*>(ui->searchResultView->model())->updateData({});
@@ -363,8 +344,6 @@ void MainWindow::setupConnections()
             this, &MainWindow::on_actionOpen_triggered);
     connect(ui->runButton, &QPushButton::clicked,
             this, &MainWindow::on_actionRun_triggered);
-    connect(mAggregationDialog, &AggregationDialog::aggregationUpdated,
-             this, &MainWindow::aggregationUpdate);
     connect(mFilterDialog, &FilterDialog::viewConfigUpdated,
             this, &MainWindow::viewConfigUpdate);
     connect(ui->modelInspector, &ModelInspector::viewChanged,
@@ -373,7 +352,6 @@ void MainWindow::setupConnections()
             this, [this]{
         static_cast<SearchResultModel*>(ui->searchResultView->model())->updateData({});
         setGlobalFiltersData();
-        setAggregationData();
     });
     connect(ui->searchResultView, &QTableView::doubleClicked,
             this, &MainWindow::searchResultSelectionChanged);
@@ -472,7 +450,6 @@ void MainWindow::loadSingleModelInstance(int exitCode, QProcess::ExitStatus exit
     }
     ui->modelInspector->loadModelInstance(true);
     setGlobalFiltersData();
-    setAggregationData();
     emit ui->actionShow_Absolute->triggered();
 }
 
@@ -493,7 +470,6 @@ void MainWindow::loadMultiModelInstance(int exitCode, QProcess::ExitStatus exitS
     }
     ui->modelInspector->loadModelInstance(true);
     setGlobalFiltersData();
-    setAggregationData();
     emit ui->actionShow_Absolute->triggered();
 }
 
@@ -516,12 +492,6 @@ void MainWindow::loadGAMSModel(const QString &path)
 void MainWindow::setGlobalFiltersData()
 {
     mFilterDialog->setViewConfig(ui->modelInspector->viewConfig());
-}
-
-void MainWindow::setAggregationData()
-{
-    mAggregationDialog->setViewConfig(ui->modelInspector->viewConfig());
-    mAggregationStatusLabel->setText(ui->modelInspector->viewConfig()->currentAggregation().typeText());
 }
 
 void MainWindow::showDialog(QDialog *dialog)

@@ -33,7 +33,6 @@ class ComprehensiveTableModel;
 class HierarchicalHeaderView;
 class ComprehensiveTableModel;
 class ValueFormatProxyModel;
-class AbsFormatProxyModel;
 class Symbol;
 
 class AbstractBPViewFrame : public AbstractTableViewFrame
@@ -55,18 +54,12 @@ public:
 signals:
     void newSymbolViewRequested();
 
-protected slots:
-    void setIdentifierLabelFilter(const gams::studio::mii::IdentifierState &state,
-                                  Qt::Orientation orientation) override;
-
 private slots:
     void customMenuRequested(const QPoint &pos);
 
     void handleRowColumnSelection();
 
 protected:
-    void updateIdentifierFilter() override;
-
     void setIdentifierFilterCheckState(int symbolIndex,
                                        Qt::CheckState state,
                                        Qt::Orientation orientation);
@@ -105,7 +98,8 @@ public:
         return ViewHelper::ViewDataType::BP_Overview;
     }
 
-    void updateView() override;
+public slots:
+    void evaluateFilters() override;
 
 private:
     void setupView();
@@ -134,10 +128,8 @@ public:
         return ViewHelper::ViewDataType::BP_Count;
     }
 
-    void updateView() override;
-
-protected:
-    void updateValueFilter() override;
+public slots:
+    void evaluateFilters() override;
 
 private:
     void setupView();
@@ -170,10 +162,8 @@ public:
         return ViewHelper::ViewDataType::BP_Average;
     }
 
-    void updateView() override;
-
-protected:
-    void updateValueFilter() override;
+public slots:
+    void evaluateFilters() override;
 
 private:
     void setupView();
@@ -205,10 +195,8 @@ public:
 
     void setupView(const QSharedPointer<AbstractModelInstance> &modelInstance) override;
 
-    void updateView() override;
-
-protected:
-    void updateValueFilter() override;
+public slots:
+    void evaluateFilters() override;
 
 private:
     void setupView();

@@ -100,11 +100,12 @@ void FilterDialog::setViewConfig(const QSharedPointer<AbstractViewConfiguration>
 
 void FilterDialog::on_applyButton_clicked()
 {
-    mViewConfig->currentIdentifierFilter()[variableOrientation()] = applyHeaderFilter(mVarFilterModel);
-    mViewConfig->currentIdentifierFilter()[equationOrientation()] = applyHeaderFilter(mEqnFilterModel);
+    mViewConfig->setFilterDialogState(AbstractViewConfiguration::Apply);
+    mViewConfig->currentIdentifierFilter()[variableOrientation()] = applyHeaderFilter(variableOrientation(), mVarFilterModel);
+    mViewConfig->currentIdentifierFilter()[equationOrientation()] = applyHeaderFilter(equationOrientation(), mEqnFilterModel);
     applyValueFilter();
-    mViewConfig->currentLabelFiler().LabelCheckStates[variableOrientation()] = applyLabelFilter(variableOrientation(), mLabelFilterModel);
-    mViewConfig->currentLabelFiler().LabelCheckStates[equationOrientation()] = applyLabelFilter(equationOrientation(), mLabelFilterModel);
+    applyLabelFilter(variableOrientation(), mLabelFilterModel);
+    applyLabelFilter(equationOrientation(), mLabelFilterModel);
     mViewConfig->currentLabelFiler().Any = ui->labelBox->currentIndex();
     mViewConfig->setCurrentAttributeFilter(applyAttributeFilter(mAttrFilterModel));
     emit viewConfigUpdated();
@@ -116,8 +117,15 @@ void FilterDialog::on_resetButton_clicked()
     ui->columnEdit->setText("");
     ui->labelEdit->setText("");
     ui->labelBox->setCurrentIndex(0);
-
-    mViewConfig->resetIdentifierFilter();
+    mViewConfig->setFilterDialogState(AbstractViewConfiguration::Reset);
+    IdentifierFilter identifierFilter = mViewConfig->defaultIdentifierFilter();
+    for (const auto& entry : std::as_const(mViewConfig->currentIdentifierFilter()[Qt::Horizontal])) {
+        identifierFilter[Qt::Horizontal][entry.SymbolIndex].CheckStates = entry.CheckStates;
+    }
+    for (const auto& entry : std::as_const(mViewConfig->currentIdentifierFilter()[Qt::Vertical])) {
+        identifierFilter[Qt::Vertical][entry.SymbolIndex].CheckStates = entry.CheckStates;
+    }
+    mViewConfig->currentIdentifierFilter() = identifierFilter;
     mViewConfig->resetLabelFilter();
     auto filter = mViewConfig->defaultValueFilter();
     if (mViewConfig->currentValueFilter().UseAbsoluteValuesGlobal) {
@@ -375,7 +383,7 @@ void FilterDialog::applyCheckState(QTreeView *view,
     }
 }
 
-IdentifierStates FilterDialog::applyHeaderFilter(QSortFilterProxyModel *model)
+IdentifierStates FilterDialog::applyHeaderFilter(Qt::Orientation orientation, QSortFilterProxyModel *model)
 {
     QList<FilterTreeItem*> items {
         static_cast<FilterTreeModel*>(model->sourceModel())->filterItem()
@@ -391,6 +399,7 @@ IdentifierStates FilterDialog::applyHeaderFilter(QSortFilterProxyModel *model)
         identifierState.SymbolIndex = item->symbolIndex();
         identifierState.Text =  item->text();
         identifierState.Checked = item->checked();
+        identifierState.CheckStates = mViewConfig->currentIdentifierFilter()[orientation][item->symbolIndex()].CheckStates;
         filter[item->symbolIndex()] = identifierState;
     }
     return filter;
@@ -401,15 +410,13 @@ void FilterDialog::applyValueFilter()
     mViewConfig->currentValueFilter().MinValue = ui->minEdit->text().toDouble();
     mViewConfig->currentValueFilter().MaxValue = ui->maxEdit->text().toDouble();
     mViewConfig->currentValueFilter().ExcludeRange = ui->excludeBox->isChecked();
-    mViewConfig->currentValueFilter().PreviousAbsolute = mViewConfig->currentValueFilter().isAbsolute();
     mViewConfig->currentValueFilter().UseAbsoluteValues = ui->absoluteBox->isChecked();
     mViewConfig->currentValueFilter().ShowPInf = ui->pInfBox->isChecked();
     mViewConfig->currentValueFilter().ShowNInf = ui->nInfBox->isChecked();
     mViewConfig->currentValueFilter().ShowEps = ui->epsBox->isChecked();
 }
 
-LabelCheckStates FilterDialog::applyLabelFilter(Qt::Orientation orientation,
-                                                QSortFilterProxyModel *model)
+void FilterDialog::applyLabelFilter(Qt::Orientation orientation, QSortFilterProxyModel *model)
 {
     FilterTreeItem* root = nullptr;
     auto childs = static_cast<FilterTreeModel*>(model->sourceModel())->filterItem()->childs();
@@ -423,6 +430,7 @@ LabelCheckStates FilterDialog::applyLabelFilter(Qt::Orientation orientation,
         }
     }
 
+    QStringList unchecked;
     LabelCheckStates filter;
     if (root) {
         QList<FilterTreeItem*> items { root };
@@ -432,9 +440,12 @@ LabelCheckStates FilterDialog::applyLabelFilter(Qt::Orientation orientation,
             if (!item->isCheckable())
                 continue;
             filter[item->text()] = item->checked();
+            if (item->checked() == Qt::Unchecked)
+                unchecked << item->text();
         }
     }
-    return filter;
+    mViewConfig->currentLabelFiler().LabelCheckStates[orientation] = std::move(filter);
+    mViewConfig->currentLabelFiler().UncheckedLabels[orientation] = std::move(unchecked);
 }
 
 LabelCheckStates FilterDialog::applyAttributeFilter(QSortFilterProxyModel *model)

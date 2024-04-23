@@ -37,19 +37,6 @@ AbstractViewFrame::~AbstractViewFrame()
 
 }
 
-void AbstractViewFrame::updateFilters(AbstractViewConfiguration::Options options)
-{
-    if (options | AbstractViewConfiguration::IdentifierConfig) {
-        updateIdentifierFilter();
-    }
-    if (options | AbstractViewConfiguration::LabelConfig) {
-        updateLabelFilter();
-    }
-    if (options | AbstractViewConfiguration::ValueConfig) {
-        updateValueFilter();
-    }
-}
-
 SearchResult &AbstractViewFrame::searchResult()
 {
     return mViewConfig->searchResult();
@@ -65,17 +52,7 @@ void AbstractViewFrame::setViewConfig(const QSharedPointer<AbstractViewConfigura
     mViewConfig = viewConfig;
 }
 
-void AbstractViewFrame::updateIdentifierFilter()
-{
-
-}
-
-void AbstractViewFrame::updateLabelFilter()
-{
-
-}
-
-void AbstractViewFrame::updateValueFilter()
+void AbstractViewFrame::evaluateFilters()
 {
 
 }
@@ -105,11 +82,6 @@ void EmtpyViewFrame::setShowAbsoluteValues(bool absoluteValues)
 ViewHelper::ViewDataType EmtpyViewFrame::type() const
 {
     return ViewHelper::ViewDataType::Unknown;
-}
-
-void EmtpyViewFrame::updateView()
-{
-
 }
 
 void EmtpyViewFrame::zoomIn()

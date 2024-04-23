@@ -62,10 +62,10 @@ QVariant SymbolModelInstanceTableModel::data(const QModelIndex &index, int role)
         return mModelInstance->data(index.row(), index.column(), mViewConfig->viewId());
     }
     if (role == ViewHelper::ColumnEntryRole) {
-        return mModelInstance->columnEntries(index.column(), mViewConfig->viewId());
+        return mModelInstance->columnEntryCount(index.column(), mViewConfig->viewId());
     }
     if (role == ViewHelper::RowEntryRole) {
-        return mModelInstance->rowEntries(index.row(), mViewConfig->viewId());
+        return mModelInstance->rowEntryCount(index.row(), mViewConfig->viewId());
     }
     return QVariant();
 }

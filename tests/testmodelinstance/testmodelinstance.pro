@@ -15,7 +15,6 @@ SOURCES +=  tst_testmodelinstance.cpp                    \
             $$SRCPATH/mii/filtertreeitem.cpp             \
             $$SRCPATH/mii/labeltreeitem.cpp              \
             $$SRCPATH/mii/symbol.cpp                     \
-            $$SRCPATH/mii/aggregation.cpp                \
             $$SRCPATH/mii/viewconfigurationprovider.cpp  \
             $$SRCPATH/mii/common.cpp                     \
             $$SRCPATH/mii/postopttreeitem.cpp

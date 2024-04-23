@@ -61,8 +61,6 @@ public:
 
     ViewHelper::ViewDataType type() const override;
 
-    void updateView() override;
-
     void zoomIn() override;
 
     void zoomOut() override;
@@ -74,10 +72,8 @@ public:
 signals:
     void openFilterDialog();
 
-protected:
-    void updateIdentifierFilter() override;
-
-    void updateValueFilter() override;
+public slots:
+    void evaluateFilters() override;
 
 private:
     void setupView();

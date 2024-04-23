@@ -67,7 +67,7 @@ QList<FilterTreeItem*> FilterTreeItem::childs() const
 
 bool FilterTreeItem::hasChildren() const
 {
-    return mChilds.size();
+    return !mChilds.isEmpty();
 }
 
 int FilterTreeItem::columnCount() const

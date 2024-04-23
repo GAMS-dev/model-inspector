@@ -206,7 +206,6 @@
      <addaction name="actionZoom_Reset"/>
     </widget>
     <addaction name="actionFilters"/>
-    <addaction name="actionAggregation"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Absolute"/>
     <addaction name="actionShow_Output"/>

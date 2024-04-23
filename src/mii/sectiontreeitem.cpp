@@ -384,9 +384,9 @@ void SectionGroupTreeItem::remove(int index, int count)
 {
     if (index+count > mChilds.size())
         return;
-    QVector<AbstractSectionTreeItem*> items;
+    QVector<AbstractSectionTreeItem*> items(index+count);
     for (int i=index; i<index+count; ++i) {
-        items.push_back(mChilds[i]);
+        items[i] = mChilds.at(i);
     }
     mChilds.remove(index, count);
     qDeleteAll(items);
