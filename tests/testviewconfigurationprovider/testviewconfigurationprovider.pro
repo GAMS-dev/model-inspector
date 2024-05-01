@@ -19,4 +19,5 @@ SOURCES +=  tst_testviewconfigurationprovider.cpp        \
             $$SRCPATH/mii/symbol.cpp                     \
             $$SRCPATH/mii/viewconfigurationprovider.cpp  \
             $$SRCPATH/mii/common.cpp                     \
-            $$SRCPATH/mii/postopttreeitem.cpp
+            $$SRCPATH/mii/postopttreeitem.cpp            \
+            $$SRCPATH/mii/numerics.cpp

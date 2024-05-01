@@ -23,6 +23,7 @@
 #include "datamatrix.h"
 #include "postopttreeitem.h"
 #include "viewconfigurationprovider.h"
+#include "numerics.h"
 
 #include <algorithm>
 #include <functional>
@@ -1770,7 +1771,14 @@ private:
                     double jac = value(jacval.toDouble());
                     double xi = value(mModelInstance.equationAttribute(AttributeHelper::MarginalNumText, equation->firstSection(), e, abs).toDouble());
                     double jacxi = value(jacval.toDouble() * xi);
-                    eqnGroup->append(new LinePostoptTreeItem({name, jac, xi, jacxi}, eqnGroup));
+                    eqnGroup->append(new LinePostoptTreeItem(
+                        {
+                         name,
+                         DoubleFormatter::format(jac, DoubleFormatter::g, 6, true),
+                         DoubleFormatter::format(xi, DoubleFormatter::g, 6, true),
+                         DoubleFormatter::format(jacxi, DoubleFormatter::g, 6, true)
+                        },
+                        eqnGroup));
                 }
             }
             if (eqnGroup->rowCount()) {
@@ -1807,7 +1815,14 @@ private:
                     double jac = value(jacval.toDouble());
                     double ui = value(mModelInstance.variableAttribute(AttributeHelper::LevelText, variable->firstSection(), e, abs).toDouble());
                     double jacui = value(jac * ui);
-                    varGroup->append(new LinePostoptTreeItem({name, jac, ui, jacui}, varGroup));
+                    varGroup->append(new LinePostoptTreeItem(
+                        {
+                         name,
+                         DoubleFormatter::format(jac, DoubleFormatter::g, 6, true),
+                         DoubleFormatter::format(ui, DoubleFormatter::g, 6, true),
+                         DoubleFormatter::format(jacui, DoubleFormatter::g, 6, true)
+                        },
+                        varGroup));
                 }
             }
             if (varGroup->rowCount()) {

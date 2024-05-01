@@ -28,6 +28,9 @@ CONFIG += c++17
 # Setup and include the GAMS distribution
 include(../gamsdependency.pri)
 
+INCLUDEPATH += $$PWD/../extern
+include(../extern/dtoaloc/dtoaloc.pri)
+
 macx {
 # ! The icns-file is created from a folder named gams.iconset containing images in multiple sizes.
 # ! On mac osX type the command: iconutil -c icns [base-folder]/gams.iconset to create gams.icns
@@ -81,6 +84,7 @@ SOURCES += \
     mii/comprehensivetablemodel.cpp \
     mii/datahandler.cpp \
     mii/datamatrix.cpp \
+    mii/dtoaformatproxymodel.cpp \
     mii/filterdialog.cpp \
     mii/filtertreeitem.cpp \
     mii/filtertreemodel.cpp \
@@ -90,6 +94,7 @@ SOURCES += \
     mii/modelinstance.cpp    \
     mii/modelinspector.cpp \
     mii/modelinstancetableview.cpp \
+    mii/numerics.cpp \
     mii/postopttreeitem.cpp \
     mii/postopttreemodel.cpp \
     mii/postopttreeview.cpp \
@@ -125,6 +130,7 @@ HEADERS += \
     mii/comprehensivetablemodel.h \
     mii/datahandler.h \
     mii/datamatrix.h \
+    mii/dtoaformatproxymodel.h \
     mii/filterdialog.h \
     mii/filtertreeitem.h \
     mii/filtertreemodel.h \
@@ -134,6 +140,7 @@ HEADERS += \
     mii/modelinstance.h  \
     mii/modelinspector.h \
     mii/modelinstancetableview.h \
+    mii/numerics.h \
     mii/postopttreeitem.h \
     mii/postopttreemodel.h \
     mii/postopttreeview.h \

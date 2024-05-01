@@ -22,6 +22,7 @@
 #include "datahandler.h"
 #include "datamatrix.h"
 #include "labeltreeitem.h"
+#include "numerics.h"
 
 #include <QAbstractItemModel>
 #include <QVector>
@@ -676,7 +677,8 @@ QVariant ModelInstance::equationAttribute(const QString &header, int index, int 
         value = gmoGetEquMOne(mGMO, absoluteIndex);
         return specialMarginalEquValuePtr(value, absoluteIndex, abs);
     } else if (!header.compare(AttributeHelper::MarginalNumText, Qt::CaseInsensitive)) {
-        return specialValue(gmoGetEquMOne(mGMO, absoluteIndex));
+        value = specialValue(gmoGetEquMOne(mGMO, absoluteIndex));
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::ScaleText, Qt::CaseInsensitive)) {
         value = gmoGetEquScaleOne(mGMO, absoluteIndex);
     } else if (!header.compare(AttributeHelper::UpperText, Qt::CaseInsensitive)) {
@@ -691,7 +693,9 @@ QVariant ModelInstance::equationAttribute(const QString &header, int index, int 
         double v2 = AttributeHelper::attributeValue(a, b, isInf(a), isInf(b));
         value = std::max(0.0, std::max(v1, v2));
         value = abs ? std::abs(value) : value;
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::RangeText, Qt::CaseInsensitive)) {
         double a = specialValue(equationBounds(absoluteIndex).second);
         double b = specialValue(equationBounds(absoluteIndex).first);
@@ -708,21 +712,27 @@ QVariant ModelInstance::equationAttribute(const QString &header, int index, int 
         v2 = std::max(0.0, v2);
         v2 = abs ? std::abs(v2) : v2;
         value = std::min(v1, v2);
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::SlackLBText, Qt::CaseInsensitive)) {
         double a = specialValue(gmoGetEquLOne(mGMO, absoluteIndex));
         double b = specialValue(equationBounds(absoluteIndex).first);
         value = AttributeHelper::attributeValue(a, b, isInf(a), isInf(b));
         value = std::max(0.0, value);
         value = abs ? std::abs(value) : value;
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::SlackUBText, Qt::CaseInsensitive)) {
         double a = specialValue(equationBounds(absoluteIndex).second);
         double b = specialValue(gmoGetEquLOne(mGMO, absoluteIndex));
         value = AttributeHelper::attributeValue(a, b, isInf(a), isInf(b));
         value = std::max(0.0, value);
         value = abs ? std::abs(value) : value;
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::TypeText, Qt::CaseInsensitive)) {
         return QChar(equationType(index));
     } else {
@@ -756,7 +766,9 @@ QVariant ModelInstance::variableAttribute(const QString &header, int index, int 
         double v2 = AttributeHelper::attributeValue(a, b, isInf(a), isInf(b));
         value = std::max(0.0, std::max(v1, v2));
         value = abs ? std::abs(value) : value;
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::RangeText, Qt::CaseInsensitive)) {
         double a = specialValue(gmoGetVarUpperOne(mGMO, absoluteIndex));
         double b = specialValue(gmoGetVarLowerOne(mGMO, absoluteIndex));
@@ -773,21 +785,27 @@ QVariant ModelInstance::variableAttribute(const QString &header, int index, int 
         v2 = std::max(0.0, v2);
         v2 = abs ? std::abs(v2) : v2;
         value = std::min(v1, v2);
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::SlackLBText, Qt::CaseInsensitive)) {
         double a = specialValue(gmoGetVarLOne(mGMO, absoluteIndex));
         double b = specialValue(gmoGetVarLowerOne(mGMO, absoluteIndex));
         value = AttributeHelper::attributeValue(a, b, isInf(a), isInf(b));
         value = std::max(0.0, value);
         value = abs ? std::abs(value) : value;
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::SlackUBText, Qt::CaseInsensitive)) {
         double a = specialValue(gmoGetVarUpperOne(mGMO, absoluteIndex));
         double b = specialValue(gmoGetVarLOne(mGMO, absoluteIndex));
         value = AttributeHelper::attributeValue(a, b, isInf(a), isInf(b));
         value = std::max(0.0, value);
         value = abs ? std::abs(value) : value;
-        return isInf(value) ? specialValuePostopt(value, abs) : value;
+        if (isInf(value))
+            return specialValuePostopt(value, abs);
+        return DoubleFormatter::format(value, DoubleFormatter::g, 6, true);
     } else if (!header.compare(AttributeHelper::TypeText, Qt::CaseInsensitive)) {
         auto type = QChar(variableType(index));
         if (type == 'x') { // x = continuous
@@ -870,7 +888,8 @@ QVariant ModelInstance::specialValuePostopt(double value, bool abs) const
         return ValueHelper::NINFText;
     else if (GMS_SV_EPS == value)
         return ValueHelper::EPSText;
-    return abs ? std::abs(value) : value;
+    auto val = abs ? std::abs(value) : value;
+    return DoubleFormatter::format(val, DoubleFormatter::g, 6, true);
 }
 
 bool ModelInstance::isSpecialValue(double value) const

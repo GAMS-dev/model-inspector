@@ -16,4 +16,5 @@ SOURCES +=  tst_testdatahandler.cpp                      \
             $$SRCPATH/mii/labeltreeitem.cpp              \
             $$SRCPATH/mii/viewconfigurationprovider.cpp  \
             $$SRCPATH/mii/common.cpp                     \
-            $$SRCPATH/mii/postopttreeitem.cpp
+            $$SRCPATH/mii/postopttreeitem.cpp            \
+            $$SRCPATH/mii/numerics.cpp

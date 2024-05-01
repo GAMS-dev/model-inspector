@@ -26,6 +26,7 @@
 #include "hierarchicalheaderview.h"
 #include "bpidentifierfiltermodel.h"
 #include "valueformatproxymodel.h"
+#include "dtoaformatproxymodel.h"
 #include "symbol.h"
 
 #include <QAction>
@@ -337,10 +338,12 @@ void BPAverageViewFrame::setupView()
     mValueFormatModel->setSourceModel(baseModel);
     mIdentifierFilterModel = new BPIdentifierFilterModel(mModelInstance, ui->tableView);
     mIdentifierFilterModel->setSourceModel(mValueFormatModel);
+    auto dtoaModel = new DtoaBpAverageFormatProxyModel(ui->tableView);
+    dtoaModel->setSourceModel(mIdentifierFilterModel);
 
     ui->tableView->setVerticalHeader(mVerticalHeader);
     auto oldSelectionModel = ui->tableView->selectionModel();
-    ui->tableView->setModel(mIdentifierFilterModel);
+    ui->tableView->setModel(dtoaModel);
     delete oldSelectionModel;
     ui->tableView->verticalHeader()->setVisible(true);
     ui->tableView->horizontalHeader()->setVisible(true);
@@ -424,10 +427,12 @@ void BPScalingViewFrame::setupView()
     mValueFormatModel->setSourceModel(baseModel);
     mIdentifierFilterModel = new BPIdentifierFilterModel(mModelInstance, ui->tableView);
     mIdentifierFilterModel->setSourceModel(mValueFormatModel);
+    auto dtoaModel = new DtoaFormatProxyModel(ui->tableView);
+    dtoaModel->setSourceModel(mIdentifierFilterModel);
 
     ui->tableView->setVerticalHeader(mVerticalHeader);
     auto oldSelectionModel = ui->tableView->selectionModel();
-    ui->tableView->setModel(mIdentifierFilterModel);
+    ui->tableView->setModel(dtoaModel);
     delete oldSelectionModel;
     ui->tableView->horizontalHeader()->setVisible(true);
     ui->tableView->verticalHeader()->setVisible(true);

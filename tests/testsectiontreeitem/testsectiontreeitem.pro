@@ -18,4 +18,5 @@ SOURCES +=  tst_testsectiontreeitem.cpp                  \
             $$SRCPATH/mii/viewconfigurationprovider.cpp  \
             $$SRCPATH/mii/common.cpp                     \
             $$SRCPATH/mii/postopttreeitem.cpp            \
-            $$SRCPATH/mii/sectiontreeitem.cpp
+            $$SRCPATH/mii/sectiontreeitem.cpp            \
+            $$SRCPATH/mii/numerics.cpp

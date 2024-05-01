@@ -25,6 +25,7 @@
 #include "symbolmodelinstancetablemodel.h"
 #include "abstractmodelinstance.h"
 #include "symbolfiltermodel.h"
+#include "dtoaformatproxymodel.h"
 
 #include <QAction>
 #include <QMenu>
@@ -154,11 +155,13 @@ void SymbolViewFrame::setupView()
     auto baseModel = new SymbolModelInstanceTableModel(mModelInstance, mViewConfig, ui->tableView);
     mHeaderFilterModel = new SymbolFilterModel(mModelInstance, mViewConfig, ui->tableView);
     mHeaderFilterModel->setSourceModel(baseModel);
+    auto dtoaModel = new DtoaFormatProxyModel(ui->tableView);
+    dtoaModel->setSourceModel(mHeaderFilterModel);
 
     ui->tableView->setHorizontalHeader(mHorizontalHeader);
     ui->tableView->setVerticalHeader(mVerticalHeader);
     auto oldSelectionModel = ui->tableView->selectionModel();
-    ui->tableView->setModel(mHeaderFilterModel);
+    ui->tableView->setModel(dtoaModel);
     delete oldSelectionModel;
     mHorizontalHeader->setVisible(true);
     mVerticalHeader->setVisible(true);

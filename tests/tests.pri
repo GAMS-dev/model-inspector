@@ -28,6 +28,9 @@ DESTDIR = ../bin
 # Setup and include the GAMS distribution
 include(../gamsdependency.pri)
 
+INCLUDEPATH += $$PWD/../extern
+include(../extern/dtoaloc/dtoaloc.pri)
+
 macx {
     HEADERS += ../../src/macospathfinder.h
                ../../src/macoscocoabridge.h
