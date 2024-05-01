@@ -28,7 +28,7 @@ namespace studio{
 namespace mii {
 
 class SymbolFilterModel;
-class HierarchicalHeaderView;
+class SymbolHierarchicalHeaderView;
 class SymbolModelInstanceTableModel;
 
 class SymbolViewFrame final : public AbstractTableViewFrame
@@ -71,8 +71,8 @@ private:
     QMenu *mSelectionMenu;
     QAction *mResetAction = new QAction("Reset filter", this);
     QSharedPointer<SymbolModelInstanceTableModel> mBaseModel;
-    HierarchicalHeaderView* mHorizontalHeader = nullptr;
-    HierarchicalHeaderView* mVerticalHeader = nullptr;
+    SymbolHierarchicalHeaderView* mHorizontalHeader = nullptr;
+    SymbolHierarchicalHeaderView* mVerticalHeader = nullptr;
     SymbolFilterModel* mHeaderFilterModel = nullptr;
 };
 

@@ -240,6 +240,11 @@ QString EmptyModelInstance::longestVariableText() const
     return QString();
 }
 
+QString EmptyModelInstance::longestLabelText() const
+{
+    return QString();
+}
+
 int EmptyModelInstance::maximumEquationDimension() const
 {
     return 0;

@@ -153,12 +153,14 @@ private:
         }
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"Variable", "Max"};
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"", "Min"};
+        mAdditionalVerticalSymbolLabels << "Variable";
         int index = 0;
         for (auto var : mModelInstance->variables()) {
             mHorizontalSectionLabels[index++] = QStringList(var->name());
         }
         mHorizontalSectionLabels[index++] = QStringList("RHS");
         mHorizontalSectionLabels[index++] = QStringList("Equation");
+        mAdditionalHorizontalSymbolLabels << "RHS" << "Equation";
     }
 
     void symbolLabels(const QString &symName, int currentRow)
@@ -338,6 +340,7 @@ private:
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"", "Neg"};
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"# of Vars", ""};
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"Variable Type", ""};
+        mAdditionalVerticalSymbolLabels << "Coeff Cnts" << "# of Vars" << "Variable Type";
         int index = 0;
         for (auto var : mModelInstance->variables()) {
             mHorizontalSectionLabels[index++] = QStringList(var->name());
@@ -346,6 +349,7 @@ private:
         mHorizontalSectionLabels[index++] = QStringList("RHS");
         mHorizontalSectionLabels[index++] = QStringList("Coeff Cnts");
         mHorizontalSectionLabels[index++] = QStringList("# of Eqns");
+        mAdditionalHorizontalSymbolLabels << "Type" << "RHS" << "Coeff Cnts" << "# of Eqns";
     }
 
     void symbolLabels(const QString &symName, int currentRow)
@@ -419,6 +423,7 @@ private:
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"", "Neg"};
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"# of Vars", ""};
         mVerticalSectionLabels[mVerticalSectionLabels.size()] = QStringList {"Variable Type", ""};
+        mAdditionalVerticalSymbolLabels << "Cfs PerVar" << "# of Vars" << "Variable Type";
         int index = 0;
         for (auto var : mModelInstance->variables()) {
             mHorizontalSectionLabels[index++] = QStringList(var->name());
@@ -427,6 +432,7 @@ private:
         mHorizontalSectionLabels[index++] = QStringList("RHS");
         mHorizontalSectionLabels[index++] = QStringList("Cfs PerEqu");
         mHorizontalSectionLabels[index++] = QStringList("# of Eqns");
+        mAdditionalHorizontalSymbolLabels << "Type" << "RHS" << "Cfs PerEqu" << "# of Eqns";
     }
 
     void symbolLabels(const QString &symName, int currentRow)
@@ -564,6 +570,16 @@ void AbstractViewConfiguration::createLabelFilter()
         mCurrentLabelFilter.LabelCheckStates[Qt::Horizontal][label] = Qt::Checked;
         mCurrentLabelFilter.LabelCheckStates[Qt::Vertical][label] = Qt::Checked;
     }
+}
+
+const QStringList &AbstractViewConfiguration::additionalVerticalSymbolLabels() const
+{
+    return mAdditionalVerticalSymbolLabels;
+}
+
+const QStringList &AbstractViewConfiguration::additionalHorizontalSymbolLabels() const
+{
+    return mAdditionalHorizontalSymbolLabels;
 }
 
 AbstractViewConfiguration *ViewConfigurationProvider::defaultConfiguration()

@@ -269,18 +269,6 @@ public:
         }
     }
 
-    static bool isStandardView(ViewDataType type)
-    {
-        switch (type) {
-        case ViewDataType::BP_Count:
-        case ViewDataType::BP_Average:
-        case ViewDataType::BP_Scaling:
-            return false;
-        default:
-            return true;
-        }
-    }
-
     static const int ZoomFactor = 2;
 
     static const QString AttributeHeaderText;

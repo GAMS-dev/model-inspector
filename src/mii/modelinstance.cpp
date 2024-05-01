@@ -157,13 +157,16 @@ int ModelInstance::variableRowCount() const
 QString ModelInstance::longestEquationText() const
 {
     return mLongestEqnText;
-    //return mLongestEqnText.size() > mLongestLabel.size() ? mLongestEqnText : mLongestLabel;
 }
 
 QString ModelInstance::longestVariableText() const
 {
     return mLongestVarText;
-    //return mLongestVarText.size() > mLongestLabel.size() ? mLongestVarText : mLongestLabel;
+}
+
+QString ModelInstance::longestLabelText() const
+{
+    return mLongestLabel;
 }
 
 Symbol* ModelInstance::variable(int sectionIndex) const
@@ -281,7 +284,7 @@ void ModelInstance::loadSymbols()
                 vSectionIndexToSymbol.append(sym);
             }
             if (sym->name().size() > mLongestEqnText.size()) {
-                mLongestEqnText = sym->name().left(10); // TODO !!! fix header space issue
+                mLongestEqnText = sym->name();
             }
         } else if (Symbol::Variable == sym->type()) {
             mMaxVariableDimension = std::max(mMaxVariableDimension, sym->dimension());
@@ -295,7 +298,7 @@ void ModelInstance::loadSymbols()
                 hSectionIndexToSymbol.append(sym);
             }
             if (sym->name().size() > mLongestVarText.size()) {
-                mLongestVarText = sym->name().left(10); // TODO !!! fix header space issue
+                mLongestVarText = sym->name();
             }
         } else {
             delete sym;
@@ -495,7 +498,7 @@ void ModelInstance::loadLabels()
     }
     for (const auto& label : std::as_const(mLabels)) {
         if (label.size() > mLongestLabel.size())
-            mLongestLabel = label.left(10); // TODO !!! fix header space issue
+            mLongestLabel = label;
     }
 }
 

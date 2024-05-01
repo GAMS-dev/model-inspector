@@ -82,6 +82,8 @@ public:
 
     QString longestVariableText() const override;
 
+    QString longestLabelText() const override;
+
     int maximumEquationDimension() const override;
 
     int maximumVariableDimension() const override;

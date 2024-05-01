@@ -20,7 +20,7 @@
  */
 #include "symbolviewframe.h"
 #include "viewconfigurationprovider.h"
-#include "hierarchicalheaderview.h"
+#include "symbolhierarchicalheaderview.h"
 #include "ui_standardtableviewframe.h"
 #include "symbolmodelinstancetablemodel.h"
 #include "abstractmodelinstance.h"
@@ -28,6 +28,7 @@
 
 #include <QAction>
 #include <QMenu>
+#include <QScrollBar>
 
 namespace gams {
 namespace studio{
@@ -137,17 +138,17 @@ void SymbolViewFrame::resetHeaderFilter()
 
 void SymbolViewFrame::setupView()
 {
-    mHorizontalHeader = new HierarchicalHeaderView(Qt::Horizontal,
-                                                   mModelInstance,
-                                                   mViewConfig,
-                                                   ui->tableView);
-    connect(mHorizontalHeader, &HierarchicalHeaderView::filterChanged,
+    mHorizontalHeader = new SymbolHierarchicalHeaderView(Qt::Horizontal,
+                                                         mModelInstance,
+                                                         mViewConfig,
+                                                         ui->tableView);
+    connect(mHorizontalHeader, &SymbolHierarchicalHeaderView::filterChanged,
             this, &SymbolViewFrame::evaluateFilters);
-    mVerticalHeader = new HierarchicalHeaderView(Qt::Vertical,
-                                                 mModelInstance,
-                                                 mViewConfig,
-                                                 ui->tableView);
-    connect(mVerticalHeader, &HierarchicalHeaderView::filterChanged,
+    mVerticalHeader = new SymbolHierarchicalHeaderView(Qt::Vertical,
+                                                       mModelInstance,
+                                                       mViewConfig,
+                                                       ui->tableView);
+    connect(mVerticalHeader, &SymbolHierarchicalHeaderView::filterChanged,
             this, &SymbolViewFrame::evaluateFilters);
 
     auto baseModel = new SymbolModelInstanceTableModel(mModelInstance, mViewConfig, ui->tableView);
@@ -163,6 +164,15 @@ void SymbolViewFrame::setupView()
     mVerticalHeader->setVisible(true);
 
     mBaseModel = QSharedPointer<SymbolModelInstanceTableModel>(baseModel);
+
+    connect(ui->tableView->verticalScrollBar(), &QScrollBar::valueChanged,
+            ui->tableView->model(), [this]{
+        emit ui->tableView->model()->headerDataChanged(Qt::Vertical, 0, 1);
+    });
+    connect(ui->tableView->horizontalScrollBar(), &QScrollBar::valueChanged,
+            ui->tableView->model(), [this]{
+        emit ui->tableView->model()->headerDataChanged(Qt::Horizontal, 0, 1);
+    });
 }
 
 }

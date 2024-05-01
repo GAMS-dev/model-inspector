@@ -18,10 +18,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-#ifndef HIERARCHICALHEADERVIEW_H
-#define HIERARCHICALHEADERVIEW_H
+#ifndef SYMBOLHIERARCHICALHEADERVIEW_H
+#define SYMBOLHIERARCHICALHEADERVIEW_H
 
 #include <QHeaderView>
+
+#include "common.h"
+
+class QMenu;
 
 namespace gams {
 namespace studio{
@@ -29,27 +33,41 @@ namespace mii {
 
 class AbstractModelInstance;
 class AbstractViewConfiguration;
+class LabelFilterWidget;
 
-class HierarchicalHeaderView final : public QHeaderView
+class SymbolHierarchicalHeaderView final : public QHeaderView
 {
     Q_OBJECT
 
 public:
-    HierarchicalHeaderView(Qt::Orientation orientation,
+    SymbolHierarchicalHeaderView(Qt::Orientation orientation,
                            const QSharedPointer<AbstractModelInstance> &modelInstance,
                            const QSharedPointer<AbstractViewConfiguration> &viewConfig,
                            QWidget *parent = nullptr);
 
-    ~HierarchicalHeaderView() override;
+    ~SymbolHierarchicalHeaderView() override;
 
     QSharedPointer<AbstractModelInstance> modelInstance() const;
 
     const QSharedPointer<AbstractViewConfiguration>& viewConfig() const;
 
+public slots:
+    void customMenuRequested(const QPoint &position);
+
+signals:
+    void filterChanged();
+
+private slots:
+    void on_filterChanged(const gams::studio::mii::IdentifierState& state,
+                          Qt::Orientation orientation);
+
 protected:
-    void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const override;
+    void paintSection(QPainter *painter, const QRect &rect,
+                      int logicalIndex) const override;
 
     QSize sectionSizeFromContents(int logicalIndex) const override;
+
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
     QStyleOptionHeader styleOptionForCell(int logicalIndex) const;
@@ -59,10 +77,12 @@ private:
     QSharedPointer<AbstractModelInstance> mModelInstance;
     QSharedPointer<AbstractViewConfiguration> mViewConfig;
     HierarchicalHeaderView_private *mPrivate;
+    QMenu *mFilterMenu;
+    LabelFilterWidget *mFilterWidget;
 };
 
 }
 }
 }
 
-#endif // HIERARCHICALHEADERVIEW_H
+#endif // SYMBOLHIERARCHICALHEADERVIEW_H

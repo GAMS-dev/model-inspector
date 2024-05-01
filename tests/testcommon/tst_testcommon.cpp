@@ -52,7 +52,6 @@ private slots:
     void test_SpecialValueHelper_static();
 
     void test_ViewHelper_isAggregatable();
-    void test_ViewHelper_isStandardView();
     void test_ViewHelper_zoomFactor();
     void test_ViewHelper_static();
 
@@ -348,17 +347,6 @@ void TestCommon::test_ViewHelper_isAggregatable()
     QCOMPARE(ViewHelper::isAggregatable(ViewHelper::ViewDataType::Postopt), false);
     QCOMPARE(ViewHelper::isAggregatable(ViewHelper::ViewDataType::Symbols), true);
     QCOMPARE(ViewHelper::isAggregatable(ViewHelper::ViewDataType::Unknown), false);
-}
-
-void TestCommon::test_ViewHelper_isStandardView()
-{
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::BP_Overview), true);
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::BP_Count), false);
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::BP_Average), false);
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::BP_Scaling), false);
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::Postopt), true);
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::Symbols), true);
-    QCOMPARE(ViewHelper::isStandardView(ViewHelper::ViewDataType::Unknown), true);
 }
 
 void TestCommon::test_ViewHelper_zoomFactor()

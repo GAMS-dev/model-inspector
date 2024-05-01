@@ -156,6 +156,8 @@ public:
 
     virtual QString longestVariableText() const = 0;
 
+    virtual QString longestLabelText() const = 0;
+
     virtual int maximumEquationDimension() const = 0;
 
     virtual int maximumVariableDimension() const = 0;
@@ -250,6 +252,8 @@ public:
     QString longestEquationText() const override;
 
     QString longestVariableText() const override;
+
+    QString longestLabelText() const override;
 
     int maximumEquationDimension() const override;
 

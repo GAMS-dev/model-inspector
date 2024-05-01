@@ -101,6 +101,7 @@ SOURCES += \
     mii/sectiontreeview.cpp \
     mii/symbol.cpp \
     mii/symbolfiltermodel.cpp \
+    mii/symbolhierarchicalheaderview.cpp \
     mii/symbolmodelinstancetablemodel.cpp \
     mii/symbolviewframe.cpp \
     mii/valueformatproxymodel.cpp \
@@ -144,6 +145,7 @@ HEADERS += \
     mii/sectiontreeview.h \
     mii/symbol.h \
     mii/symbolfiltermodel.h \
+    mii/symbolhierarchicalheaderview.h \
     mii/symbolmodelinstancetablemodel.h \
     mii/symbolviewframe.h \
     mii/valueformatproxymodel.h \

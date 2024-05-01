@@ -199,6 +199,10 @@ public:
         return mSearchResult;
     }
 
+    const QStringList& additionalHorizontalSymbolLabels() const;
+
+    const QStringList& additionalVerticalSymbolLabels() const;
+
 protected:
     virtual IdentifierStates createDefaultSymbolFilter(Qt::Orientation orientation) const = 0;
 
@@ -224,6 +228,9 @@ protected:
     LabelCheckStates mDefaultAttributeFilter;
 
     FilterDialogState mFilterDialogState = None;
+
+    QStringList mAdditionalHorizontalSymbolLabels;
+    QStringList mAdditionalVerticalSymbolLabels;
 
 private:
     int mViewId;
