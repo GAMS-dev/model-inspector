@@ -4,21 +4,25 @@ GAMS Model Instance Inspector (MII) is a system to examine the structure and pro
 
 ## How To Get Started
 
-Before the MII is downloaded and installed please make sure that GAMS is installed. Details on how to install GAMS can be found on the [download page](https://www.gams.com/download/). Please make sure that the `PATH` variable is set during the GAMS installation. If this is not done on your system you have to copy the MII to the GAMS system directory.
+Before the MII is downloaded and installed please make sure that GAMS is installed. Details on how to install GAMS can be found on the [download page](https://www.gams.com/download/). Please make sure that the `PATH` variable is set during the GAMS installation. If this is not done on your system you have to copy the MII to the GAMS system directory. Details on adding GAMS to the path can be found in the [GAMS documentation](https://www.gams.com/latest/docs/UG_MAIN.html#UG_INSTALL).
 
-First download the latest version from the release page at [GitHub](https://github.com/GAMS-dev/gams-mii/releases).
+When GAMS has been successfully installed the MII needs to be downloaded. All the MII releases can be found on [GitHub](https://github.com/GAMS-dev/gams-mii/releases), but the recommendation is that the latest version is used.
 
-Secondly install the MII on your system. If you did not add GAMS to the `PATH` please copy/move the MII to the GAMS system directory; otherwise our recommendations are...
+Now the MII needs to be installed. If you did not add GAMS to the `PATH` please copy/move the MII to the GAMS system directory; otherwise our recommendations are
 
 - **Windows**
-  - Extract the archive and move the MII directory to your prefered location.
+  - Extract the archive, e.g. `GAMS_MII-0.4.9-x86_64.zip`
+  - Move the MII directory to your prefered location.
   - Navigate into the directory and run the `mii.exe`
 - **Linux**
-  - Move the AppImage to your prefered location
-  - Make the AppImage executable: `chmod +x GAMS_MII-0.2.2-x86_64.AppImage`
-  - Run the MII: `./GAMS_MII-0.2.2-x86_64.AppImage`
-- **macOS**
-  - Open the dmg, e.g. `GAMS_MII-0.2.2-x86_64.dmg`
+  - Move the AppImage (`GAMS_MII-0.4.9-x86_64.AppImage`) to your prefered location
+  - Make the AppImage executable: `chmod +x GAMS_MII-0.4.9-x86_64.AppImage`
+  - Run the MII: `./GAMS_MII-0.4.9-x86_64.AppImage`
+- **macOS x86 (Intel)**
+  - Open the dmg, e.g. `GAMS_MII-0.4.9-x86_64.dmg`
+  - Run the MII by double clicking on the MII icon
+- **macOS M (ARM)**
+  - Open the dmg, e.g. `GAMS_MII-0.4.9-arm_64.dmg`
   - Run the MII by double clicking on the MII icon
 
 ## How to use
@@ -29,7 +33,7 @@ There are two ways to use the MII to inspect a model instance:
    - This will run the selected `.gms` file with some required command line parameter and the data of the **last** model instance in that file will be openend for inspection.
 2. Select `gamscntr.dat` from a [scratch directory](https://www.gams.com/44/docs/UG_GamsCall.html#GAMSAOscrdir) of a model that was executed already and hit the `Run` button.
    - This does not run the model again but just opens the given data for inspection.
-   - The easiest way to generate such scratch directory is to execute a `.gms` file with the command line parameter [MIIMode](https://www.gams.com/44/docs/UG_GamsCall.html#GAMSAOmiimode).
+   - The easiest way to generate such a scratch directory is to execute a `.gms` file with the command line parameter [MIIMode](https://www.gams.com/44/docs/UG_GamsCall.html#GAMSAOmiimode).
 
 # How to build
 
@@ -56,13 +60,13 @@ Start Qt Creator, open the project file `model-inspector.pro` and click `Build -
 
 On Windows the file contains:
 ```
-GAMS_DISTRIB=C:/GAMS/44
+GAMS_DISTRIB=C:/GAMS/47
 GAMS_DISTRIB_C_API=$$GAMS_DISTRIB/apifiles/C/api
 GAMS_DISTRIB_CPP_API=$$GAMS_DISTRIB/apifiles/C++/api
 ```
 On Unix it will look like:
 ```
-GAMS_DISTRIB=$$(HOME)/gams/gams44.0_linux_x64_64_sfx
+GAMS_DISTRIB=$$(HOME)/gams/gams47.1_linux_x64_64_sfx
 GAMS_DISTRIB_C_API=$$GAMS_DISTRIB/apifiles/C/api
 GAMS_DISTRIB_CPP_API=$$GAMS_DISTRIB/apifiles/C++/api
 ```
@@ -83,3 +87,4 @@ Before you request a review of your changes please make sure that you used the l
 | Dependency | License | Description |
 | ------ | ------ | ------ |
 | [Qt 6](https://www.qt.io/) | [LGPL](https://doc.qt.io/qt-6/lgpl.html) | [Qt Licensing](https://doc.qt.io/qt-6/licensing.html). The Qt 6 everywhere package (source) can be downloaded from [GAMS](https://d37drm4t2jghv5.cloudfront.net/qt/qt-everywhere-src-6.4.2.tar.xz) or directly from https://www.qt.io/download, where installers are provided as well. |
+| [dtoaLoc](extern/dtoaloc) | [License](extern/dtoaloc/README.md) | |
