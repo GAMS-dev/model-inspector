@@ -1,8 +1,8 @@
 /**
  * GAMS Model Instance Inspector (MII)
  *
- * Copyright (c) 2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2023-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2023-2024 GAMS Development Corp. <support@gams.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 #ifndef FILTERTREEITEM_H
 #define FILTERTREEITEM_H

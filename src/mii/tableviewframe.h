@@ -1,6 +1,8 @@
-/*
- * Copyright (c) 2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2023 GAMS Development Corp. <support@gams.com>
+/**
+ * GAMS Model Instance Inspector (MII)
+ *
+ * Copyright (c) 2023-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2023-2024 GAMS Development Corp. <support@gams.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,6 +14,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef TABLEVIEWFRAME_H
 #define TABLEVIEWFRAME_H

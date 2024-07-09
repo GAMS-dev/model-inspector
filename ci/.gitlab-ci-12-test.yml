@@ -54,7 +54,7 @@ test-deg:
 
 test-leg:
   stage: test
-  tags: [linux]
+  tags: [puma]
   allow_failure: true
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
