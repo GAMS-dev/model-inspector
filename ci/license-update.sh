@@ -10,7 +10,7 @@ cd ..
 
 ## Update copyright and license
 git clone https://${GITLAB_USER}:${GITLAB_CI_UPDATE_TOKEN}@git.gams.com/afust/license-update-script.git script
-./script/src/update-license.py -p $CI_PROJECT_DIR/mii/src --mii-license
+./script/update-license.py -p $CI_PROJECT_DIR/mii/src --mii-license
 
 ## Commit and push updates
 cd mii
@@ -18,7 +18,7 @@ CHANGES=$(git diff --name-only)
 if [[ "$CHANGES" == "" ]]; then
     echo "NO CHANGES... NOTHING TO PUSH"
 else
-    echo "update copyright, license"
+    echo "UPDATE copyright, license"
     git add -u
     git commit -m "pipeline update copyright, license"
     # prevent ci run via -o ci.skip
