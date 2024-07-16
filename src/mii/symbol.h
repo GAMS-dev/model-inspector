@@ -95,6 +95,8 @@ public:
 
     bool isVariable() const;
 
+    QVector<QSet<QString>>& dimLabels();
+
     bool operator==(const Symbol &other) const;
 
     bool operator!=(const Symbol &other) const;
@@ -111,6 +113,8 @@ private:
     SectionLabels mSectionLabels;
 
     DomainLabels mDomainLabels;
+
+    QVector<QSet<QString>> mDimLabels;
 
     QSharedPointer<LabelTreeItem> mLabelTree = nullptr;
 };

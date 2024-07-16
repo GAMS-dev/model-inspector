@@ -105,8 +105,9 @@ bool SymbolFilterModel::evaluateColumnFilters()
             anyVarActive = true;
             std::fill(mColumnStates, mColumnStates+mColumns, 1);
             // local and global variable label filters are applied
-            for (int idx : item.CheckStates) {
-                mColumnStates[idx-firstSection] = 0; // Qt::Unchecked
+            auto indices = skipColumnLabels();
+            for (auto idx : indices) {
+                mColumnStates[idx] = 0; // Qt::Unchecked
             }
             const auto& unchecked = mViewConfig->currentLabelFiler().UncheckedLabels[Qt::Horizontal];
             if (!unchecked.isEmpty()) {
@@ -163,8 +164,9 @@ bool SymbolFilterModel::evaluateRowFilters()
             anyEqnActive = true;
             std::fill(mRowStates, mRowStates+mRows, 1);
             // local and global equation label filters are applied
-            for (int idx : item.CheckStates) {
-                mRowStates[idx-firstSection] = 0; // Qt::Unchecked
+            auto indices = skipRowLabels();
+            for (auto idx : indices) {
+                mRowStates[idx] = 0; // Qt::Unchecked
             }
             const auto& unchecked = mViewConfig->currentLabelFiler().UncheckedLabels[Qt::Vertical];
             if (!unchecked.isEmpty()) {
@@ -227,6 +229,80 @@ void SymbolFilterModel::updateEntryCounts()
             }
         }
     }
+}
+
+QSet<int> SymbolFilterModel::skipColumnLabels()
+{
+    bool anyChecked = false;
+    QSet<QString> labels;
+    for (const auto& dimFilter : mViewConfig->variableLabels()) {
+        for (auto iter=dimFilter.keyValueBegin(); iter!=dimFilter.keyValueEnd(); ++iter) {
+            if (iter->second)
+                anyChecked = true;
+            else
+                labels.insert(iter->first);
+        }
+    }
+    QSet<int> indices;
+    if (mViewConfig->selectedVariables().isEmpty())
+        return indices;
+    auto firstSection = mViewConfig->selectedVariables().first()->firstSection();
+    if (!anyChecked) {
+        for (auto* var : mViewConfig->selectedVariables()) {
+            for (int s=var->firstSection(); s<=var->lastSection(); ++s) {
+                indices.insert(s-firstSection);
+            }
+        }
+        return indices;
+    }
+    for (auto* var : mViewConfig->selectedVariables()) {
+        for (int s=var->firstSection(); s<=var->lastSection(); ++s) {
+            for (const auto& label : labels) {
+                if (var->sectionLabels()[s].contains(label, Qt::CaseInsensitive)) {
+                    indices.insert(s-firstSection);
+                    break;
+                }
+            }
+        }
+    }
+    return indices;
+}
+
+QSet<int> SymbolFilterModel::skipRowLabels()
+{
+    bool anyChecked = false;
+    QSet<QString> labels;
+    for (const auto& dimFilter : mViewConfig->equationLabels()) {
+        for (auto iter=dimFilter.keyValueBegin(); iter!=dimFilter.keyValueEnd(); ++iter) {
+            if (iter->second)
+                anyChecked = true;
+            else
+                labels.insert(iter->first);
+        }
+    }
+    QSet<int> indices;
+    if (mViewConfig->selectedEquations().isEmpty())
+        return indices;
+    auto firstSection = mViewConfig->selectedEquations().first()->firstSection();
+    if (!anyChecked) {
+        for (auto* eqn : mViewConfig->selectedEquations()) {
+            for (int s=eqn->firstSection(); s<=eqn->lastSection(); ++s) {
+                indices.insert(s-firstSection);
+            }
+        }
+        return indices;
+    }
+    for (auto* eqn : mViewConfig->selectedEquations()) {
+        for (int s=eqn->firstSection(); s<=eqn->lastSection(); ++s) {
+            for (const auto& label : labels) {
+                if (eqn->sectionLabels()[s].contains(label, Qt::CaseInsensitive)) {
+                    indices.insert(s-firstSection);
+                    break;
+                }
+            }
+        }
+    }
+    return indices;
 }
 
 }

@@ -202,6 +202,20 @@ public:
 
     const QStringList& additionalVerticalSymbolLabels() const;
 
+    QVector<LabelCheckStates>& equationLabels();
+
+    void setEquationLabels(const QList<Symbol *> &equations);
+
+    QVector<LabelCheckStates>& variableLabels();
+
+    void setVariableLabels(const QList<Symbol *> &variables);
+
+    const QList<Symbol *> &selectedEquations() const;
+    void setSelectedEquations(const QList<Symbol *> &newSelectedEquations);
+
+    const QList<Symbol *> &selectedVariables() const;
+    void setSelectedVariables(const QList<Symbol *> &newSelectedVariables);
+
 protected:
     virtual IdentifierStates createDefaultSymbolFilter(Qt::Orientation orientation) const = 0;
 
@@ -230,6 +244,11 @@ protected:
 
     QStringList mAdditionalHorizontalSymbolLabels;
     QStringList mAdditionalVerticalSymbolLabels;
+
+    QVector<LabelCheckStates> mEquationLabels;
+    QVector<LabelCheckStates> mVariableLabels;
+    QList<Symbol *> mSelectedEquations;
+    QList<Symbol *> mSelectedVariables;
 
 private:
     int mViewId;

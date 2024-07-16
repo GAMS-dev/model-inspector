@@ -161,6 +161,11 @@ bool Symbol::isVariable() const
     return mType == Variable;
 }
 
+QVector<QSet<QString> > &Symbol::dimLabels()
+{
+    return mDimLabels;
+}
+
 bool Symbol::operator==(const Symbol &other) const
 {
     return mFirstSection == other.mFirstSection     &&

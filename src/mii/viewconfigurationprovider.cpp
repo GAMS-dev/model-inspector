@@ -571,6 +571,80 @@ void AbstractViewConfiguration::createLabelFilter()
     }
 }
 
+const QList<Symbol *> &AbstractViewConfiguration::selectedVariables() const
+{
+    return mSelectedVariables;
+}
+
+void AbstractViewConfiguration::setSelectedVariables(const QList<Symbol *> &newSelectedVariables)
+{
+    mSelectedVariables = newSelectedVariables;
+}
+
+const QList<Symbol *> &AbstractViewConfiguration::selectedEquations() const
+{
+    return mSelectedEquations;
+}
+
+void AbstractViewConfiguration::setSelectedEquations(const QList<Symbol *> &newSelectedEquations)
+{
+    mSelectedEquations = newSelectedEquations;
+}
+
+QVector<LabelCheckStates>& AbstractViewConfiguration::equationLabels()
+{
+    return mEquationLabels;
+}
+
+void AbstractViewConfiguration::setEquationLabels(const QList<Symbol *> &equations)
+{
+    mEquationLabels.clear();
+    int dim = 0;
+    for (auto eqn : equations) {
+        dim = std::max(dim, eqn->dimension());
+    }
+    QVector<QSet<QString>> data(dim);
+    for (auto eqn : equations) {
+        for (int i=0; i<eqn->dimLabels().size(); ++i) {
+            data[i].unite(eqn->dimLabels()[i]);
+        }
+    }
+    QVector<LabelCheckStates> labels(dim);
+    for (int i=0; i<dim; ++i) {
+        for (const auto& label : std::as_const(data[i])) {
+            labels[i][label] = Qt::Checked;
+        }
+    }
+    mEquationLabels = std::move(labels);
+}
+
+QVector<LabelCheckStates>& AbstractViewConfiguration::variableLabels()
+{
+    return mVariableLabels;
+}
+
+void AbstractViewConfiguration::setVariableLabels(const QList<Symbol*> &variables)
+{
+    mVariableLabels.clear();
+    int dim = 0;
+    for (auto var : variables) {
+        dim = std::max(dim, var->dimension());
+    }
+    QVector<QSet<QString>> data(dim);
+    for (auto var : variables) {
+        for (int i=0; i<var->dimLabels().size(); ++i) {
+            data[i].unite(var->dimLabels()[i]);
+        }
+    }
+    QVector<LabelCheckStates> labels(dim);
+    for (int i=0; i<dim; ++i) {
+        for (const auto& label : std::as_const(data[i])) {
+            labels[i][label] = Qt::Checked;
+        }
+    }
+    mVariableLabels = std::move(labels);
+}
+
 const QStringList &AbstractViewConfiguration::additionalVerticalSymbolLabels() const
 {
     return mAdditionalVerticalSymbolLabels;

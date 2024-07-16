@@ -355,6 +355,7 @@ void ModelInstance::loadEquationDimensions(Symbol *symbol)
     int nDomains = 0;
     char labelName[GMS_SSSIZE];
     int domains[GLOBAL_MAX_INDEX_DIM];
+    symbol->dimLabels() = QVector<QSet<QString>>(symbol->dimension());
     for (int j=0; j<symbol->entries(); ++j) {
         if (gmoGetiSolverQuiet(mGMO, symbol->offset() + j) < 0) {
             mLogMessages << "ERROR: calling gmoGetiSolverQuiet() in ModelInstance::loadDimensions()";
@@ -369,6 +370,7 @@ void ModelInstance::loadEquationDimensions(Symbol *symbol)
         for (int k=0; k<nDomains; ++k) {
             dctUelLabel(mDCT, domains[k], &quote, labelName, GMS_SSSIZE);
             labels[k] = labelName;
+            symbol->dimLabels()[k].insert(labelName);
         }
         symbol->sectionLabels()[symbol->firstSection()+j] = std::move(labels);
     }
@@ -380,6 +382,7 @@ void ModelInstance::loadVariableDimensions(Symbol *symbol)
     int nDomains = 0;
     char labelName[GMS_SSSIZE];
     int domains[GLOBAL_MAX_INDEX_DIM];
+    symbol->dimLabels() = QVector<QSet<QString>>(symbol->dimension());
     for (int j=0; j<symbol->entries(); ++j) {
         if (gmoGetjSolverQuiet(mGMO, symbol->offset() + j) < 0) {
             mLogMessages << "ERROR: calling gmoGetjSolverQuiet() in ModelInstance::loadDimensions()";
@@ -394,6 +397,7 @@ void ModelInstance::loadVariableDimensions(Symbol *symbol)
         for (int k=0; k<nDomains; ++k) {
             dctUelLabel(mDCT, domains[k], &quote, labelName, GMS_SSSIZE);
             labels[k] = labelName;
+            symbol->dimLabels()[k].insert(labelName);
         }
         symbol->sectionLabels()[symbol->firstSection()+j] = std::move(labels);
     }

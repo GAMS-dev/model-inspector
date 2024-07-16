@@ -69,6 +69,15 @@ bool FilterTreeItem::hasChildren() const
     return !mChilds.isEmpty();
 }
 
+FilterTreeItem *FilterTreeItem::contains(const QString &label)
+{
+    for (auto item : mChilds) {
+        if (item->text() == label)
+            return item;
+    }
+    return nullptr;
+}
+
 int FilterTreeItem::columnCount() const
 {
     return 1;

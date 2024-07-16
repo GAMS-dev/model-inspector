@@ -140,13 +140,11 @@ void SymbolViewFrame::setupView()
 {
     mHorizontalHeader = new SymbolHierarchicalHeaderView(Qt::Horizontal,
                                                          mModelInstance,
-                                                         mViewConfig,
                                                          ui->tableView);
     connect(mHorizontalHeader, &SymbolHierarchicalHeaderView::filterChanged,
             this, &SymbolViewFrame::evaluateFilters);
     mVerticalHeader = new SymbolHierarchicalHeaderView(Qt::Vertical,
                                                        mModelInstance,
-                                                       mViewConfig,
                                                        ui->tableView);
     connect(mVerticalHeader, &SymbolHierarchicalHeaderView::filterChanged,
             this, &SymbolViewFrame::evaluateFilters);

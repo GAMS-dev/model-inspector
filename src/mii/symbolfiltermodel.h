@@ -23,8 +23,6 @@
 #include <QSharedPointer>
 #include <QSortFilterProxyModel>
 
-#include "common.h"
-
 namespace gams {
 namespace studio {
 namespace mii {
@@ -64,6 +62,9 @@ private:
 
     void updateEntryCounts();
 
+    QSet<int> skipColumnLabels();
+
+    QSet<int> skipRowLabels();
 private:
     QSharedPointer<AbstractModelInstance> mModelInstance;
     QSharedPointer<AbstractViewConfiguration> mViewConfig;

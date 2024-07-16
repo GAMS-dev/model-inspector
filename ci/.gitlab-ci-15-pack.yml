@@ -126,7 +126,7 @@ pack-leg:
 
 pack-wei:
   stage: pack
-  tags: [windows]
+  tags: [pond]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   needs: [build-wei]
@@ -167,7 +167,7 @@ pack-wei-debug:
     - if: $PF_WEI_DEBUG == "0"
       when: never
     - when: always
-  tags: [windows]
+  tags: [pond]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   needs: [build-wei-debug]
@@ -201,4 +201,3 @@ pack-wei-debug:
     paths: ['GAMS-MII-wei-debug-x86_64.zip']
     expose_as: 'GAMS-MII-wei-debug-x86_64'
     expire_in: 1 days
-

@@ -326,6 +326,10 @@ void ModelInspector::createNewSymbolView()
                    currentBPView->selectedVariables().constFirst()->name() + ".."  +
                    currentBPView->selectedVariables().constLast()->name();
     }
+    view->viewConfig()->setEquationLabels(currentBPView->selectedEquations());
+    view->viewConfig()->setVariableLabels(currentBPView->selectedVariables());
+    view->viewConfig()->setSelectedEquations(currentBPView->selectedEquations());
+    view->viewConfig()->setSelectedVariables(currentBPView->selectedVariables());
     ui->stackedWidget->setCurrentIndex(page);
     auto index = ui->sectionView->currentIndex();
     auto item = static_cast<AbstractSectionTreeItem*>(index.internalPointer());

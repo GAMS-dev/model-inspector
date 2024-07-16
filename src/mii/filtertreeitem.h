@@ -46,6 +46,8 @@ public:
 
     bool hasChildren() const;
 
+    FilterTreeItem* contains(const QString& label);
+
     int columnCount() const;
 
     int rowCount() const;

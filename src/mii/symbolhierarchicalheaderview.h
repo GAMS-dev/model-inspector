@@ -22,17 +22,12 @@
 
 #include <QHeaderView>
 
-#include "common.h"
-
-class QMenu;
-
 namespace gams {
 namespace studio{
 namespace mii {
 
 class AbstractModelInstance;
 class AbstractViewConfiguration;
-class LabelFilterWidget;
 
 class SymbolHierarchicalHeaderView final : public QHeaderView
 {
@@ -40,25 +35,15 @@ class SymbolHierarchicalHeaderView final : public QHeaderView
 
 public:
     SymbolHierarchicalHeaderView(Qt::Orientation orientation,
-                           const QSharedPointer<AbstractModelInstance> &modelInstance,
-                           const QSharedPointer<AbstractViewConfiguration> &viewConfig,
-                           QWidget *parent = nullptr);
+                                 const QSharedPointer<AbstractModelInstance> &modelInstance,
+                                 QWidget *parent = nullptr);
 
     ~SymbolHierarchicalHeaderView() override;
 
     QSharedPointer<AbstractModelInstance> modelInstance() const;
 
-    const QSharedPointer<AbstractViewConfiguration>& viewConfig() const;
-
-public slots:
-    void customMenuRequested(const QPoint &position);
-
 signals:
     void filterChanged();
-
-private slots:
-    void on_filterChanged(const gams::studio::mii::IdentifierState& state,
-                          Qt::Orientation orientation);
 
 protected:
     void paintSection(QPainter *painter, const QRect &rect,
@@ -66,18 +51,13 @@ protected:
 
     QSize sectionSizeFromContents(int logicalIndex) const override;
 
-    void mousePressEvent(QMouseEvent *event) override;
-
 private:
     QStyleOptionHeader styleOptionForCell(int logicalIndex) const;
 
 private:
     class HierarchicalHeaderView_private;
     QSharedPointer<AbstractModelInstance> mModelInstance;
-    QSharedPointer<AbstractViewConfiguration> mViewConfig;
     HierarchicalHeaderView_private *mPrivate;
-    QMenu *mFilterMenu;
-    LabelFilterWidget *mFilterWidget;
 };
 
 }

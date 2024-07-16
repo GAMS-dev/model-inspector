@@ -89,7 +89,6 @@ SOURCES += \
     mii/filtertreeitem.cpp \
     mii/filtertreemodel.cpp \
     mii/hierarchicalheaderview.cpp \
-    mii/labelfilterwidget.cpp \
     mii/labeltreeitem.cpp \
     mii/modelinstance.cpp    \
     mii/modelinspector.cpp \
@@ -135,7 +134,6 @@ HEADERS += \
     mii/filtertreeitem.h \
     mii/filtertreemodel.h \
     mii/hierarchicalheaderview.h \
-    mii/labelfilterwidget.h \
     mii/labeltreeitem.h \
     mii/modelinstance.h  \
     mii/modelinspector.h \
@@ -162,7 +160,6 @@ HEADERS += \
 FORMS += \
     mainwindow.ui \
     mii/filterdialog.ui \
-    mii/labelfilterwidget.ui \
     mii/modelinspector.ui \
     mii/postopttreeviewframe.ui \
     mii/standardtableviewframe.ui

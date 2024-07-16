@@ -38,6 +38,7 @@ class FilterDialog;
 
 class AbstractViewConfiguration;
 class FilterTreeItem;
+class Symbol;
 
 class FilterDialog : public QDialog
 {
@@ -55,31 +56,37 @@ signals:
     void viewConfigUpdated();
 
 private slots:
-    void on_applyButton_clicked();
+    void applyButtonClicked();
 
-    void on_resetButton_clicked();
+    void resetButtonClicked();
 
-    void on_cancelButton_clicked();
+    void cancelButtonClicked();
 
-    void on_selectEqnButton_clicked();
+    void selectEqnEntries();
 
-    void on_deselectEqnButton_clicked();
+    void deselectEqnEntries();
 
-    void on_selectVarButton_clicked();
+    void selectVarEntries();
 
-    void on_deselectVarButton_clicked();
+    void deselectVarEntries();
 
-    void on_selectLabelButton_clicked();
+    void selectLabelEntries();
 
-    void on_deselectLabelButton_clicked();
+    void deselectLabelEntries();
 
-    void on_labelBox_currentIndexChanged(int index);
+    void labelBoxCurrentIndexChanged(int index);
 
-    void on_selectAttrButton_clicked();
+    void selectAttrEntries();
 
-    void on_deselectAttrButton_clicked();
+    void deselectAttrEntries();
+
+    void selectDimEntries();
+
+    void deselectDimEntries();
 
 private:
+    void setupConnections();
+
     void setupEquationFilter(const IdentifierStates &filter, const IdentifierStates &dFilter);
     void setupVariableFilter(const IdentifierStates &filter, const IdentifierStates &dFilter);
     void setupAttributeFilter();
@@ -88,6 +95,8 @@ private:
                                       const IdentifierStates &filter,
                                       const IdentifierStates &dFilter);
     void setupLabelTreeItems(const QString &text, Qt::Orientation orientation, FilterTreeItem *root);
+    void setupDimensionFilter();
+    void setupSymbolDimensions(const QVector<LabelCheckStates>& labels, FilterTreeItem *root);
 
     void applyCheckState(QTreeView* view,
                          QSortFilterProxyModel *model,
@@ -95,6 +104,8 @@ private:
     IdentifierStates applyHeaderFilter(Qt::Orientation orientation, QSortFilterProxyModel *model);
     void applyValueFilter();
     void applyLabelFilter(Qt::Orientation orientation, QSortFilterProxyModel *model);
+    void applySymbolDimensions();
+    void resetSymbolDimensions();
 
     LabelCheckStates applyAttributeFilter(QSortFilterProxyModel *model);
 
@@ -117,6 +128,7 @@ private:
     QSortFilterProxyModel *mVarFilterModel;
     QSortFilterProxyModel *mLabelFilterModel;
     QSortFilterProxyModel *mAttrFilterModel;
+    QSortFilterProxyModel *mDimFilterModel;
 };
 
 }

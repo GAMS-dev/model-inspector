@@ -263,6 +263,7 @@ void MainWindow::loadModelInstance(int exitCode, QProcess::ExitStatus exitStatus
         break;
     default:
         ui->logEdit->appendPlainText("Error: Wrong MiiMode parameter: " + ui->paramsEdit->text());
+        setRunButtonState(true);
         break;
     }
 }
@@ -482,6 +483,7 @@ void MainWindow::loadGAMSModel(const QString &path)
         if (result == QMessageBox::No)
             return;
     }
+    ui->logEdit->appendPlainText(QString("Load model %1 from model library. The target location is %2.").arg(ui->modelEdit->text(), path));
     mLibProcess->setTargetDir(path);
     QString model = ui->modelEdit->text();
     mLibProcess->setModelName(model.replace(".gms", "").trimmed());

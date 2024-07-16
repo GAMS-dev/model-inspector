@@ -44,22 +44,7 @@ FilterDialog::FilterDialog(QWidget *parent)
     ui->labelView->sortByColumn(0, Qt::AscendingOrder);
     ui->minEdit->setValidator(new QDoubleValidator(ui->minEdit));
     ui->maxEdit->setValidator(new QDoubleValidator(ui->maxEdit));
-
-    connect(this, &QDialog::rejected,
-            this, &FilterDialog::on_cancelButton_clicked);
-    connect(ui->absoluteBox, &QCheckBox::stateChanged,
-            this, [this](){
-        updateRangeEdit(ui->minEdit, ui->minEdit->text());
-        updateRangeEdit(ui->maxEdit, ui->maxEdit->text());
-    });
-    connect(ui->minEdit, &QLineEdit::textEdited,
-            this, [this](const QString &text) {
-        updateRangeEdit(ui->minEdit, text);
-    });
-    connect(ui->maxEdit, &QLineEdit::textEdited,
-            this, [this](const QString &text) {
-        updateRangeEdit(ui->maxEdit, text);
-    });
+    setupConnections();
 }
 
 FilterDialog::~FilterDialog()
@@ -81,6 +66,7 @@ void FilterDialog::setViewConfig(const QSharedPointer<AbstractViewConfiguration>
                         mViewConfig->defaultIdentifierFilter().value(variableOrientation()));
     setupAttributeFilter();
     setupLabelFilter();
+    setupDimensionFilter();
 
     ui->minEdit->setText(QString::number(mViewConfig->currentValueFilter().MinValue));
     updateRangeEdit(ui->minEdit, ui->minEdit->text());
@@ -97,7 +83,7 @@ void FilterDialog::setViewConfig(const QSharedPointer<AbstractViewConfiguration>
     ui->pInfBox->setChecked(mViewConfig->currentValueFilter().ShowPInf);
 }
 
-void FilterDialog::on_applyButton_clicked()
+void FilterDialog::applyButtonClicked()
 {
     mViewConfig->setFilterDialogState(AbstractViewConfiguration::Apply);
     mViewConfig->currentIdentifierFilter()[variableOrientation()] = applyHeaderFilter(variableOrientation(), mVarFilterModel);
@@ -107,10 +93,11 @@ void FilterDialog::on_applyButton_clicked()
     applyLabelFilter(equationOrientation(), mLabelFilterModel);
     mViewConfig->currentLabelFiler().Any = ui->labelBox->currentIndex();
     mViewConfig->setCurrentAttributeFilter(applyAttributeFilter(mAttrFilterModel));
+    applySymbolDimensions();
     emit viewConfigUpdated();
 }
 
-void FilterDialog::on_resetButton_clicked()
+void FilterDialog::resetButtonClicked()
 {
     ui->rowEdit->setText("");
     ui->columnEdit->setText("");
@@ -132,11 +119,12 @@ void FilterDialog::on_resetButton_clicked()
         filter.UseAbsoluteValuesGlobal = mViewConfig->currentValueFilter().UseAbsoluteValuesGlobal;
     }
     mViewConfig->setCurrentValueFilter(filter);
+    resetSymbolDimensions();
     setViewConfig(mViewConfig);
-    on_applyButton_clicked();
+    applyButtonClicked();
 }
 
-void FilterDialog::on_cancelButton_clicked()
+void FilterDialog::cancelButtonClicked()
 {
     setViewConfig(mViewConfig);
     ui->rowEdit->setText("");
@@ -146,7 +134,7 @@ void FilterDialog::on_cancelButton_clicked()
     close();
 }
 
-void FilterDialog::on_selectEqnButton_clicked()
+void FilterDialog::selectEqnEntries()
 {
     if (!mEqnFilterModel)
         return;
@@ -154,7 +142,7 @@ void FilterDialog::on_selectEqnButton_clicked()
     ui->rowView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_deselectEqnButton_clicked()
+void FilterDialog::deselectEqnEntries()
 {
     if (!mEqnFilterModel)
         return;
@@ -162,7 +150,7 @@ void FilterDialog::on_deselectEqnButton_clicked()
     ui->rowView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_selectVarButton_clicked()
+void FilterDialog::selectVarEntries()
 {
     if (!mVarFilterModel)
         return;
@@ -170,7 +158,7 @@ void FilterDialog::on_selectVarButton_clicked()
     ui->columnView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_deselectVarButton_clicked()
+void FilterDialog::deselectVarEntries()
 {
     if (!mVarFilterModel)
         return;
@@ -178,7 +166,7 @@ void FilterDialog::on_deselectVarButton_clicked()
     ui->columnView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_selectLabelButton_clicked()
+void FilterDialog::selectLabelEntries()
 {
     if (!mLabelFilterModel)
         return;
@@ -186,7 +174,7 @@ void FilterDialog::on_selectLabelButton_clicked()
     ui->labelView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_deselectLabelButton_clicked()
+void FilterDialog::deselectLabelEntries()
 {
     if (!mLabelFilterModel)
         return;
@@ -194,7 +182,7 @@ void FilterDialog::on_deselectLabelButton_clicked()
     ui->labelView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_labelBox_currentIndexChanged(int index)
+void FilterDialog::labelBoxCurrentIndexChanged(int index)
 {
     switch (index) {
     case 1: // Any
@@ -206,16 +194,60 @@ void FilterDialog::on_labelBox_currentIndexChanged(int index)
     }
 }
 
-void FilterDialog::on_selectAttrButton_clicked()
+void FilterDialog::selectAttrEntries()
 {
     applyCheckState(ui->attributeView, mAttrFilterModel, Qt::Checked);
     ui->attributeView->dataChanged(QModelIndex(), QModelIndex());
 }
 
-void FilterDialog::on_deselectAttrButton_clicked()
+void FilterDialog::deselectAttrEntries()
 {
     applyCheckState(ui->attributeView, mAttrFilterModel, Qt::Unchecked);
     ui->attributeView->dataChanged(QModelIndex(), QModelIndex());
+}
+
+void FilterDialog::selectDimEntries()
+{
+    applyCheckState(ui->dimView, mDimFilterModel, Qt::Checked);
+    ui->dimView->dataChanged(QModelIndex(), QModelIndex());
+}
+
+void FilterDialog::deselectDimEntries()
+{
+    applyCheckState(ui->dimView, mDimFilterModel, Qt::Unchecked);
+    ui->dimView->dataChanged(QModelIndex(), QModelIndex());
+}
+
+void FilterDialog::setupConnections()
+{
+    connect(ui->applyButton, &QPushButton::clicked, this, &FilterDialog::applyButtonClicked);
+    connect(ui->cancelButton, &QPushButton::clicked, this, &FilterDialog::cancelButtonClicked);
+    connect(ui->resetButton, &QPushButton::clicked, this, &FilterDialog::resetButtonClicked);
+    connect(this, &QDialog::rejected, this, &FilterDialog::cancelButtonClicked);
+    connect(ui->selectEqnButton, &QPushButton::clicked, this, &FilterDialog::selectEqnEntries);
+    connect(ui->deselectEqnButton, &QPushButton::clicked, this, &FilterDialog::deselectEqnEntries);
+    connect(ui->selectVarButton, &QPushButton::clicked, this, &FilterDialog::selectVarEntries);
+    connect(ui->deselectVarButton, &QPushButton::clicked, this, &FilterDialog::deselectVarEntries);
+    connect(ui->selectLabelButton, &QPushButton::clicked, this, &FilterDialog::selectLabelEntries);
+    connect(ui->deselectLabelButton, &QPushButton::clicked, this, &FilterDialog::deselectLabelEntries);
+    connect(ui->labelBox, &QComboBox::currentIndexChanged, this, &FilterDialog::labelBoxCurrentIndexChanged);
+    connect(ui->absoluteBox, &QCheckBox::stateChanged,
+            this, [this](){
+                updateRangeEdit(ui->minEdit, ui->minEdit->text());
+                updateRangeEdit(ui->maxEdit, ui->maxEdit->text());
+            });
+    connect(ui->minEdit, &QLineEdit::textEdited,
+            this, [this](const QString &text) {
+                updateRangeEdit(ui->minEdit, text);
+            });
+    connect(ui->maxEdit, &QLineEdit::textEdited,
+            this, [this](const QString &text) {
+                updateRangeEdit(ui->maxEdit, text);
+            });
+    connect(ui->selectAttrButton, &QPushButton::clicked, this, &FilterDialog::selectAttrEntries);
+    connect(ui->deselectAttrButton, &QPushButton::clicked, this, &FilterDialog::deselectAttrEntries);
+    connect(ui->selectDimButton, &QPushButton::clicked, this, &FilterDialog::selectDimEntries);
+    connect(ui->deselectDimButton, &QPushButton::clicked, this, &FilterDialog::deselectDimEntries);
 }
 
 void FilterDialog::setupEquationFilter(const IdentifierStates &filter, const IdentifierStates &dFilter)
@@ -360,6 +392,47 @@ void FilterDialog::setupLabelTreeItems(const QString &text,
     }
 }
 
+void FilterDialog::setupDimensionFilter()
+{
+    auto root = new FilterTreeItem(QString(), Qt::Unchecked);
+    auto eqns = new FilterTreeItem(ViewHelper::EquationHeaderText, Qt::Unchecked, root);
+    eqns->setCheckable(false);
+    root->append(eqns);
+    setupSymbolDimensions(mViewConfig->equationLabels(), eqns);
+    auto vars = new FilterTreeItem(ViewHelper::VariableHeaderText, Qt::Unchecked, root);
+    vars->setCheckable(false);
+    root->append(vars);
+    setupSymbolDimensions(mViewConfig->variableLabels(), vars);
+
+    auto oldDimModel = ui->dimView->selectionModel();
+    auto dimTreeModel = new FilterTreeModel(root, ui->dimView);
+    mDimFilterModel = new QSortFilterProxyModel(ui->dimView);
+    mDimFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    mDimFilterModel->setRecursiveFilteringEnabled(true);
+    mDimFilterModel->setSourceModel(dimTreeModel);
+    ui->dimView->setModel(mDimFilterModel);
+    ui->dimView->expandAll();
+    if (oldDimModel)
+        oldDimModel->deleteLater();
+    connect(ui->dimEdit, &QLineEdit::textChanged,
+            this, [this](const QString &text){
+                mDimFilterModel->setFilterWildcard(text);
+                ui->dimView->expandAll();
+            });
+}
+
+void FilterDialog::setupSymbolDimensions(const QVector<LabelCheckStates>& labels, FilterTreeItem *root)
+{
+    for (int d=0; d<labels.size(); ++d) {
+        auto dimItem = new FilterTreeItem(QString("Dimension %1").arg(d+1), Qt::Checked, root);
+        root->append(dimItem);
+        for (auto iter=labels[d].constKeyValueBegin(); iter!=labels[d].constKeyValueEnd(); ++iter) {
+            auto labelItem = new FilterTreeItem(iter->first, iter->second, dimItem);
+            dimItem->append(labelItem);
+        }
+    }
+}
+
 void FilterDialog::applyCheckState(QTreeView *view,
                                    QSortFilterProxyModel *model,
                                    Qt::CheckState state)
@@ -445,6 +518,44 @@ void FilterDialog::applyLabelFilter(Qt::Orientation orientation, QSortFilterProx
     }
     mViewConfig->currentLabelFiler().LabelCheckStates[orientation] = std::move(filter);
     mViewConfig->currentLabelFiler().UncheckedLabels[orientation] = std::move(unchecked);
+}
+
+void FilterDialog::applySymbolDimensions()
+{
+    auto types = static_cast<FilterTreeModel*>(mDimFilterModel->sourceModel())->filterItem()->childs();
+    for (auto type : types) {
+        if (type->text() == ViewHelper::EquationHeaderText) {
+            for (auto dim : type->childs()) {
+                int d = dim->text().remove("Dimension ").toInt() - 1;
+                for (auto label : dim->childs()) {
+                    mViewConfig->equationLabels()[d][label->text()] = label->checked();
+                }
+            }
+        } else if (type->text() == ViewHelper::VariableHeaderText) {
+            for (auto dim : type->childs()) {
+                int d = dim->text().remove("Dimension ").toInt() - 1;
+                for (auto label : dim->childs()) {
+                    mViewConfig->variableLabels()[d][label->text()] = label->checked();
+                }
+            }
+        }
+    }
+}
+
+void FilterDialog::resetSymbolDimensions()
+{
+    auto& eqnLabels = mViewConfig->equationLabels();
+    for (auto& hash : eqnLabels) {
+        for (auto iter=hash.keyValueBegin(); iter!=hash.keyValueEnd(); ++iter) {
+            iter->second = Qt::Checked;
+        }
+    }
+    auto& varLabels = mViewConfig->variableLabels();
+    for (auto& hash : varLabels) {
+        for (auto iter=hash.keyValueBegin(); iter!=hash.keyValueEnd(); ++iter) {
+            iter->second = Qt::Checked;
+        }
+    }
 }
 
 LabelCheckStates FilterDialog::applyAttributeFilter(QSortFilterProxyModel *model)
