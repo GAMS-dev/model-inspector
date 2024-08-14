@@ -100,7 +100,7 @@ pack-deg:
 
 pack-leg:
   stage: pack
-  tags: [linux]
+  tags: [puma]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
@@ -126,7 +126,7 @@ pack-leg:
 
 pack-wei:
   stage: pack
-  tags: [windows]
+  tags: [pond]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   needs: [build-wei]
@@ -167,7 +167,7 @@ pack-wei-debug:
     - if: $PF_WEI_DEBUG == "0"
       when: never
     - when: always
-  tags: [windows]
+  tags: [pond]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
   needs: [build-wei-debug]

@@ -1,16 +1,14 @@
 codechecker-leg:
   stage: analyze
-  tags: [linux]
+  tags: [puma]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/analyzer:latest
     entrypoint: [""]   # prevent startup.sh
-  needs: [fetch-ci-scripts]
+  needs: [install-gams-leg]
   allow_failure: false
   variables:
     DOLLAR_GAMS: $$$$GAMS_DISTRIB
   script:
-    - !reference [.get-gams]
-    - !reference [.gams-folder-leg]
     - echo "GAMS_DISTRIB=/cache/gams-installs/`cat gams_folder_leg.txt`" > gamsinclude.pri
     - echo "GAMS_DISTRIB_C_API=$DOLLAR_GAMS/apifiles/C/api" >> gamsinclude.pri
     - echo "GAMS_DISTRIB_CPP_API=$DOLLAR_GAMS/apifiles/C++/api" >> gamsinclude.pri
@@ -25,7 +23,7 @@ codechecker-leg:
 
 license-update-leg:
   stage: analyze
-  tags: [linux]
+  tags: [puma]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/deployer:latest
     entrypoint: [""]   # prevent startup.sh
