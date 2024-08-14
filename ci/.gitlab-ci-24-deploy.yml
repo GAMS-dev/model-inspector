@@ -1,6 +1,6 @@
 deploy-cloudfront:
   stage: deploy
-  tags: [puma]
+  tags: [linux]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/deployer:latest
     entrypoint: [""]   # prevent startup.sh
@@ -15,7 +15,7 @@ deploy-cloudfront:
 
 deploy-github:
   stage: deploy
-  tags: [puma]
+  tags: [linux]
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/deployer:latest
     entrypoint: [""]   # prevent startup.sh

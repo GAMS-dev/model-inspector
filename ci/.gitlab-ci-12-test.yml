@@ -2,10 +2,12 @@ test-dac:
   stage: test
   tags: [macos-arm64]
   allow_failure: true
-  dependencies: [install-gams-dac,build-dac]
+  dependencies: [fetch-ci-scripts,build-dac]
   variables:
     qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-dac]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
     - PATH="${qtpath}:${GAMS_PATH}:${PATH}"
     - cd build && mkdir reports
@@ -29,10 +31,12 @@ test-deg:
   stage: test
   tags: [macos]
   allow_failure: true
-  dependencies: [install-gams-deg,build-deg]
+  dependencies: [fetch-ci-scripts,build-deg]
   variables:
     qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-deg]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - PATH="${qtpath}:${GAMS_PATH}:${PATH}"
     - cd build && mkdir reports
@@ -54,13 +58,15 @@ test-deg:
 
 test-leg:
   stage: test
-  tags: [puma]
+  tags: [linux]
   allow_failure: true
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
-  dependencies: [install-gams-leg,build-leg]
+  dependencies: [fetch-ci-scripts,build-leg]
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`
     - cd build && mkdir reports
     - REPORTS_DIR=$(pwd)/reports
@@ -81,12 +87,15 @@ test-leg:
 
 test-wei:
   stage: test
-  tags: [pond]
+  tags: [windows]
   allow_failure: true
   image:
     name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
-  dependencies: [install-gams-wei,build-wei]
+  dependencies: [fetch-ci-scripts,build-wei]
   script:
+    - $env:Path = "C:\Miniconda\Library\bin;C:\Miniconda\DLLs;" + $env:Path
+    - !reference [.get-gams-wei]
+    - !reference [.gams-folder-wei]
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $WORKSPACE = $([System.IO.Directory]::GetCurrentDirectory())
