@@ -1,6 +1,5 @@
 stages:
   - fetch-scripts
-  - install-gams
   - build
   - test
   - pack
@@ -9,10 +8,11 @@ stages:
 
 include:
   - project: 'devel/ciscripts'
-    file: .install-jobs.yml
+    ref: distributed-caching
+    file: '.fetch-job.yml'
   - project: 'devel/ciscripts'
+    ref: distributed-caching
     file: .shared-vars.yml
-  - 'ci/.gitlab-ci-06-gams.yml'
   - 'ci/.gitlab-ci-09-build.yml'
   - 'ci/.gitlab-ci-12-test.yml'
   - 'ci/.gitlab-ci-15-pack.yml'
