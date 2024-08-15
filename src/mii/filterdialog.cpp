@@ -425,6 +425,7 @@ void FilterDialog::setupSymbolDimensions(const QVector<LabelCheckStates>& labels
 {
     for (int d=0; d<labels.size(); ++d) {
         auto dimItem = new FilterTreeItem(QString("Dimension %1").arg(d+1), Qt::Checked, root);
+        dimItem->setCheckable(false);
         root->append(dimItem);
         for (auto iter=labels[d].constKeyValueBegin(); iter!=labels[d].constKeyValueEnd(); ++iter) {
             auto labelItem = new FilterTreeItem(iter->first, iter->second, dimItem);

@@ -105,7 +105,7 @@ bool SymbolFilterModel::evaluateColumnFilters()
             anyVarActive = true;
             std::fill(mColumnStates, mColumnStates+mColumns, 1);
             // local and global variable label filters are applied
-            auto indices = skipColumnLabels();
+            auto indices = variable->isScalar() ? QSet<int>() : skipColumnLabels();
             for (auto idx : indices) {
                 mColumnStates[idx] = 0; // Qt::Unchecked
             }
@@ -164,7 +164,7 @@ bool SymbolFilterModel::evaluateRowFilters()
             anyEqnActive = true;
             std::fill(mRowStates, mRowStates+mRows, 1);
             // local and global equation label filters are applied
-            auto indices = skipRowLabels();
+            auto indices = equation->isScalar() ? QSet<int>() : skipRowLabels();
             for (auto idx : indices) {
                 mRowStates[idx] = 0; // Qt::Unchecked
             }
