@@ -29,8 +29,8 @@ variables:
       value: $CUSTOM_BRANCH
       description: "Name of custom branch, 0 if published distribution with version as specified should be taken or X.Y.Z"
   QT_IMAGE_VERSION:
-      value: builder-qt6.7
+      value: builder-qt6.8
       description: "Current Qt image version"
   QT_VERSION:
-    value: 6.7.3
+    value: 6.8.0
     description: "Current Qt version"
