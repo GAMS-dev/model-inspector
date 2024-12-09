@@ -59,6 +59,8 @@ private slots:
     void test_CmdParser_default_params();
     void test_CmdParser_scratchdir_spaces();
     void test_CmdParser_additional_params();
+    void test_CmdParser_regex_params_data();
+    void test_CmdParser_regex_params();
 };
 
 void TestCommon::test_Mi_roleNames()
@@ -411,11 +413,11 @@ void TestCommon::test_CmdParser_default_params()
 void TestCommon::test_CmdParser_scratchdir_spaces()
 {
     CmdParser cmdParser1;
-    cmdParser1.parse("MIIMode=singleMI scrdir=/home/alex/Documents/GAMS/ModelInspector/works pace/scratch");
+    cmdParser1.parse("MIIMode=singleMI scrdir=\"/home/alex/Documents/GAMS/ModelInspector/works pace/scratch\"");
     QCOMPARE(cmdParser1.mode(), ViewHelper::MiiModeType::Single);
     QStringList params1 {
         "MIIMode=singleMI",
-        "scrdir=/home/alex/Documents/GAMS/ModelInspector/works pace/scratch"
+        "scrdir=\"/home/alex/Documents/GAMS/ModelInspector/works pace/scratch\""
     };
     QCOMPARE(cmdParser1.parameters(), params1);
     QCOMPARE(cmdParser1.scratchDir(), "/home/alex/Documents/GAMS/ModelInspector/works pace/scratch");
@@ -435,15 +437,47 @@ void TestCommon::test_CmdParser_additional_params()
     QCOMPARE(cmdParser1.scratchDir(), "/home/alex/Documents/GAMS/ModelInspector/workspace/scratch");
 
     CmdParser cmdParser2;
-    cmdParser2.parse("MIIMode=multiMI scrdir=/home/alex/Documents/GAMS/ModelInspector/work space/scratch lp=xpress");
+    cmdParser2.parse("MIIMode=multiMI scrdir=\"/home/alex/Documents/GAMS/ModelInspector/work space/scratch\" lp=xpress");
     QCOMPARE(cmdParser2.mode(), ViewHelper::MiiModeType::Multi);
     QStringList params2 {
         "MIIMode=multiMI",
-        "scrdir=/home/alex/Documents/GAMS/ModelInspector/work space/scratch",
+        "scrdir=\"/home/alex/Documents/GAMS/ModelInspector/work space/scratch\"",
         "lp=xpress"
     };
     QCOMPARE(cmdParser2.parameters(), params2);
     QCOMPARE(cmdParser2.scratchDir(), "/home/alex/Documents/GAMS/ModelInspector/work space/scratch");
+}
+
+void TestCommon::test_CmdParser_regex_params_data()
+{
+    QTest::addColumn<QString>("params");
+    QTest::addColumn<QStringList>("parsed");
+
+    QTest::newRow("case 1") << QString() << QStringList();
+    QTest::newRow("case 2") << QString("//NAME=value") << QStringList("//NAME=value");
+    QTest::newRow("case 3") << QString("/-NAME=value") << QStringList("/-NAME=value");
+    QTest::newRow("case 4") << QString("-/NAME=value") << QStringList("-/NAME=value");
+    QTest::newRow("case 5") << QString("--xxx = yyy") << QStringList("--xxx = yyy");
+    QTest::newRow("case 6") << QString("--lp=xpress") << QStringList("--lp=xpress");
+    QTest::newRow("case 7") << QString("--lp= \"xpress\"") << QStringList("--lp= \"xpress\"");
+    QTest::newRow("case 8") << QString("--xxx = yyy -/lp=xpress") << QStringList({"--xxx = yyy", "-/lp=xpress"});
+    QTest::newRow("case 9") << QString("lp=xpress") << QStringList({"lp=xpress"});
+    QTest::newRow("case 10") << QString("MIIMode=singleMI scrdir=C:/Users/lwest/OneDrive/Dokumente/GAMS/ModelInspector/workspace/scratch lp = xpress")
+                             << QStringList({"MIIMode=singleMI", "scrdir=C:/Users/lwest/OneDrive/Dokumente/GAMS/ModelInspector/workspace/scratch", "lp = xpress"});
+    QTest::newRow("case 11") << QString("lp xpress") << QStringList({"lp xpress"});
+    QTest::newRow("case 12") << QString("MIIMode=singleMI scrdir=C:/Users/lwest/Documents/GAMS/ModelInspector/workspace/scratch /-xxx = yyy lp xpress")
+                             << QStringList({"MIIMode=singleMI", "scrdir=C:/Users/lwest/Documents/GAMS/ModelInspector/workspace/scratch", "/-xxx = yyy", "lp xpress"});
+    QTest::newRow("case 13") << QString("MIIMode=singleMI scrdir=C:/Users/lwest/OneDrive/Dokumente/GAMS/ModelInspector/workspace/scratch --xxx yyy ")
+                             << QStringList({"MIIMode=singleMI", "scrdir=C:/Users/lwest/OneDrive/Dokumente/GAMS/ModelInspector/workspace/scratch", "--xxx yyy"});
+}
+
+void TestCommon::test_CmdParser_regex_params()
+{
+    QFETCH(QString, params);
+    QFETCH(QStringList, parsed);
+    CmdParser cmdParser;
+    cmdParser.parse(params);
+    QCOMPARE(cmdParser.parameters(), parsed);
 }
 
 QTEST_APPLESS_MAIN(TestCommon)

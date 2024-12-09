@@ -181,4 +181,5 @@ OTHER_FILES +=                                      \
     ../ci/.gitlab-ci-20-analyze.yml                 \
     ../ci/.gitlab-ci-24-deploy.yml                  \
     ../.gitlab-ci.yml                               \
+    ../README.md                                    \
     ../version

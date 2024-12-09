@@ -367,6 +367,7 @@ void ModelInstance::loadEquationDimensions(Symbol *symbol)
             continue;
         }
         QStringList labels(symbol->dimension());
+        // TODO AF: use the universe and lazy load the uels... use int indicies everywhere
         for (int k=0; k<nDomains; ++k) {
             dctUelLabel(mDCT, domains[k], &quote, labelName, GMS_SSSIZE);
             labels[k] = labelName;
@@ -394,6 +395,7 @@ void ModelInstance::loadVariableDimensions(Symbol *symbol)
             continue;
         }
         QStringList labels(symbol->dimension());
+        // TODO AF: use the universe and lazy load the uels... use int indicies everywhere
         for (int k=0; k<nDomains; ++k) {
             dctUelLabel(mDCT, domains[k], &quote, labelName, GMS_SSSIZE);
             labels[k] = labelName;

@@ -35,7 +35,7 @@ class AbstractModelInstance;
 class AbstractViewConfiguration
 {
 public:
-    enum FilterDialogState
+    enum FilterDialogState : std::uint8_t
     {
         None,
         Apply,

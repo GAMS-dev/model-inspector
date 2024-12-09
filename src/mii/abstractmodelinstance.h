@@ -42,7 +42,7 @@ protected:
                           const QString &scratchDir);
 
 public:
-    enum State
+    enum State : std::uint8_t
     {
         Valid,
         Warning,

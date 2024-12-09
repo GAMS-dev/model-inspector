@@ -86,7 +86,7 @@ void AbstractBPViewFrame::customMenuRequested(const QPoint &pos)
 
 void AbstractBPViewFrame::handleRowColumnSelection()
 {
-    QMap<int, Symbol*> rowSymbols, columnSymbols;
+    QSet<Symbol*> rowSymbols, columnSymbols;
     auto indexes = ui->tableView->selectionModel()->selectedIndexes();
     for (const auto& index : indexes) {
         if (!index.isValid())
@@ -98,11 +98,11 @@ void AbstractBPViewFrame::handleRowColumnSelection()
         int section = ui->tableView->model()->headerData(index.row(), Qt::Vertical,
                                                      ViewHelper::IndexDataRole).toInt();
         auto equation = mModelInstance->equation(section);
-        rowSymbols[section] = equation;
+        rowSymbols.insert(equation);
         section = ui->tableView->model()->headerData(index.column(), Qt::Horizontal,
                                                      ViewHelper::IndexDataRole).toInt();
         auto variable = mModelInstance->variable(section);
-        columnSymbols[section] = variable;
+        columnSymbols.insert(variable);
     }
     mSelectedEquations = rowSymbols.values();
     mSelectedVariables = columnSymbols.values();

@@ -26,11 +26,11 @@
 #include "mii/modelinspector.h"
 #include "mii/searchresultmodel.h"
 #include "mii/common.h"
-#include "mii/viewconfigurationprovider.h"
 
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QScrollBar>
 #include <QStandardPaths>
 
 #include <QDebug>
@@ -107,6 +107,7 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionRun_triggered()
 {
+    ui->logEdit->verticalScrollBar()->setValue(ui->logEdit->verticalScrollBar()->maximum());
     setRunButtonState(false);
     auto path = workspace();
     QDir dir(path);
@@ -155,7 +156,7 @@ void MainWindow::on_actionRun_triggered()
             }
         }
         mProcess->setModel(ui->modelEdit->text());
-        mProcess->setParameters(cmdParser.parameters());
+        mProcess->setParameters({cmdParser.parameters()});
         mProcess->setWorkingDir(path);
         mProcess->execute();
     }
