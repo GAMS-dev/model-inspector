@@ -104,13 +104,8 @@ public:
 
     int sectionExtent() const;
 
-    void unite(LabelTreeItem *other);
-
     static LabelTreeItem* visibleBranch(QList<LabelTreeItem*> &currentLevel,
                                         const QString &typeText, int dimension);
-
-private:
-    void unite(const QList<LabelTreeItem*> &childs);
 
 private:
     LabelTreeItem *mParent;

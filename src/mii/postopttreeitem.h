@@ -30,7 +30,7 @@ namespace mii {
 class PostoptTreeItem
 {
 public:
-    enum Type
+    enum Type : std::uint8_t
     {
         LineItem,
         GroupItem,

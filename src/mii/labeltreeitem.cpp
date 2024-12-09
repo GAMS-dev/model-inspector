@@ -209,9 +209,10 @@ SectionLabels LabelTreeItem::sectionLabels(int startSection, int dimension) cons
     SectionLabels sectionLabels;
     int extent = sectionExtent();
     QList<LabelTreeItem*> levelItems { childs() };
-    if (levelItems.isEmpty()) return sectionLabels;
+    if (levelItems.isEmpty())
+        return sectionLabels;
+    QList<LabelTreeItem*> newItems;
     for (int d=1, s=startSection; d<=dimension; ++d, s=startSection) {
-        QList<LabelTreeItem*> newItems;
         if (levelItems.isEmpty()) continue;
         int duplicate = extent / levelItems.size();
         while (!levelItems.isEmpty()) {
@@ -227,6 +228,7 @@ SectionLabels LabelTreeItem::sectionLabels(int startSection, int dimension) cons
             }
         }
         levelItems = newItems;
+        newItems.clear();
     }
     return sectionLabels;
 }
@@ -278,18 +280,6 @@ int LabelTreeItem::sectionExtent() const
     return leafs.size();
 }
 
-void LabelTreeItem::unite(LabelTreeItem *other)
-{
-    if (!other)
-        return;
-    if (hasChildren() || other->hasChildren()) {
-        unite(other->childs());
-    } else {
-        auto visible = other->visibleSections();
-        mSections.unite(QSet<int>(visible.begin(), visible.end()));
-    }
-}
-
 LabelTreeItem* LabelTreeItem::visibleBranch(QList<LabelTreeItem*> &currentLevel,
                                             const QString &typeText, int dimension)
 {
@@ -306,41 +296,6 @@ LabelTreeItem* LabelTreeItem::visibleBranch(QList<LabelTreeItem*> &currentLevel,
         }
     }
     return newItem;
-}
-
-void LabelTreeItem::unite(const QList<LabelTreeItem*> &childs)
-{
-    QList<LabelTreeItem*> invisible;
-    QHash<QString, LabelTreeItem*> unified;
-    Q_FOREACH(auto child, mChilds) {
-        if (child->isVisible()) {
-            unified[child->text()] = child;
-        } else {
-            child->setParent(nullptr);
-            invisible.append(child);
-        }
-    }
-    Q_FOREACH(auto oldChild, invisible) {
-        remove(oldChild);
-    }
-    qDeleteAll(invisible);
-    Q_FOREACH(auto child, childs) {
-        if (!child->isVisible())
-            continue;
-        if (unified.contains(child->text())) {
-            unified[child->text()]->unite(child);
-        } else {
-            auto newChild = child->clone(this);
-            unified[newChild->text()] = newChild;
-        }
-    }
-    QMap<int, LabelTreeItem*> newChilds;
-    Q_FOREACH(auto child, unified) {
-        auto firstSection = child->firstSectionIndex();
-        if (firstSection < 0) continue;
-        newChilds[firstSection] = child;
-    }
-    mChilds = newChilds.values();
 }
 
 }

@@ -34,7 +34,7 @@ class LabelTreeItem;
 class Symbol
 {
 public:
-    enum Type
+    enum Type : std::uint8_t
     {
         Equation,
         Variable,

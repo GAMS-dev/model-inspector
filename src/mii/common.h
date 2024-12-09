@@ -35,7 +35,7 @@ namespace mii {
 class AttributeHelper
 {
 public:
-    enum AttributeType
+    enum AttributeType : std::uint8_t
     {
         Level,
         /// Represents numerical and special values (as text).
@@ -133,7 +133,7 @@ public:
 class ValueHelper
 {
 public:
-    enum class EquationType
+    enum class EquationType : std::uint8_t
     {
         E,
         G,
@@ -144,7 +144,7 @@ public:
         B
     };
 
-    enum class VariableType
+    enum class VariableType : std::uint8_t
     {
         X,
         B,
@@ -155,7 +155,7 @@ public:
         SI
     };
 
-    enum class SpecialValueType
+    enum class SpecialValueType : std::uint8_t
     {
         NA,
         EPS,
@@ -205,7 +205,7 @@ public:
 class ViewHelper
 {
 public:
-    enum ItemDataRole
+    enum ItemDataRole : std::uint16_t
     {
         IndexDataRole = Qt::UserRole,
         LabelDataRole,
@@ -228,13 +228,13 @@ public:
         return mapping;
     }
 
-    enum class ViewType
+    enum class ViewType : std::uint8_t
     {
         Predefined  = 0,
         Custom      = 1
     };
 
-    enum class ViewDataType
+    enum class ViewDataType : std::uint8_t
     {
         BP_Overview         = 0,
         BP_Count            = 1,
@@ -251,7 +251,7 @@ public:
         Unknown             = 127
     };
 
-    enum class MiiModeType
+    enum class MiiModeType : std::uint8_t
     {
         None,
         Single,
@@ -294,22 +294,34 @@ class CmdParser
 {
 public:
     CmdParser()
-        : mRegEx("(\\w+=)", QRegularExpression::CaseInsensitiveOption)
+        : mKeyValRegEx(R"((\w+\s+=))", QRegularExpression::CaseInsensitiveOption)
+        , mDoubleDashRegEx(R"(([-\/]{0,2}\w+\s*={0,1}\s*\"[^\"]+\")|([-\/]{0,2}\w+\s*={0,1}\s*\S+))",
+                           QRegularExpression::CaseInsensitiveOption |
+                           QRegularExpression::DotMatchesEverythingOption)
     {
 
     }
 
     void parse(const QString& params)
     {
+        reset();
         mParams = params;
         mMode = miiMode(mParams);
-        auto values = mParams.split(mRegEx, Qt::SkipEmptyParts);
-        for (const auto& match : mRegEx.globalMatch(mParams)) {
-            auto key = match.captured().trimmed();
-            if (key == ScratchDirKey && !values.isEmpty()) {
-                mScratchDir = values.first().trimmed();
+        auto localParams = mParams;
+        auto globalMatch = mDoubleDashRegEx.globalMatch(localParams);
+        while (globalMatch.hasNext()) {
+            auto match = globalMatch.next();
+            auto captured = match.captured();
+            mParameters << captured;
+            if (captured.startsWith("MIIMode", Qt::CaseInsensitive)) {
+                continue;
+            } else if (captured.startsWith(ScratchDirKey, Qt::CaseInsensitive)) {
+                auto value = captured;
+                value = value.replace(ScratchDirKey, "");
+                value = value.replace("=", "");
+                value = value.replace("\"", "");
+                mScratchDir = value.trimmed();
             }
-            mParameters << key+(values.isEmpty() ? QString() : values.takeFirst().trimmed());
         }
     }
 
@@ -339,12 +351,22 @@ public:
     }
 
 private:
-    QRegularExpression mRegEx;
+    void reset()
+    {
+        mParams = QString();
+        mParameters.clear();
+        mScratchDir = QString();
+        mMode = ViewHelper::MiiModeType::None;
+    }
+
+private:
+    QRegularExpression mKeyValRegEx;
+    QRegularExpression mDoubleDashRegEx;
     QString mParams;
     ViewHelper::MiiModeType mMode = ViewHelper::MiiModeType::None;
     QStringList mParameters;
     QString mScratchDir;
-    const QString ScratchDirKey = "scrdir=";
+    const QString ScratchDirKey = "scrdir";
 };
 
 class FileHelper
