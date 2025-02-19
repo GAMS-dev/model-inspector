@@ -2,7 +2,7 @@ pack-dac:
   stage: pack
   tags: [macos-arm64]
   variables:
-    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
+    qtpath: /opt/Qt/${QT_VERSION}/bin
   needs: [build-dac]
   script:
     - WORKSPACE=$(pwd)
@@ -51,7 +51,7 @@ pack-deg:
   stage: pack
   tags: [macos]
   variables:
-    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
+    qtpath: /opt/Qt/${QT_VERSION}/bin
   needs: [build-deg]
   script:
     - WORKSPACE=$(pwd)
@@ -136,6 +136,7 @@ pack-wei:
   script:
     - $env:VCINSTALLDIR = "$vcinsdir"
     - '& $cmd_vcvars'
+    - $env:Path = "C:\Qt\Tools\icu\bin64;" + $env:PATH
     - mkdir mii
     - cp "/Program Files/Microsoft Visual Studio/2022/Community/VC/Redist/MSVC/14.38.33135/x64/Microsoft.VC143.CRT/*" "mii"
     - cp "/Program Files/Microsoft Visual Studio/2022/Community/VC/Redist/MSVC/14.38.33135/vc_redist.x64.exe" "mii"
@@ -176,6 +177,7 @@ pack-wei-debug:
   script:
     - $env:VCINSTALLDIR = "$vcinsdir"
     - '& $cmd_vcvars'
+    - $env:Path = "C:\Qt\Tools\icu\bin64;" + $env:PATH
     - mkdir mii
     - cp "/Program Files/Microsoft Visual Studio/2022/Community/VC/Redist/MSVC/14.38.33135/x64/Microsoft.VC143.CRT/*" "mii"
     - cp "/Program Files/Microsoft Visual Studio/2022/Community/VC/Redist/MSVC/14.38.33135/vc_redist.x64.exe" "mii"
