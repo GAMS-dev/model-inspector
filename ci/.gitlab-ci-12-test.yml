@@ -4,7 +4,7 @@ test-dac:
   allow_failure: true
   dependencies: [fetch-ci-scripts,build-dac]
   variables:
-    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
+    qtpath: /opt/Qt/${QT_VERSION}/bin
   script:
     - !reference [.get-gams]
     - !reference [.gams-folder-dac]
@@ -33,7 +33,7 @@ test-deg:
   allow_failure: true
   dependencies: [fetch-ci-scripts,build-deg]
   variables:
-    qtpath: /Users/gitlab/Qt/${QT_VERSION}/macos/bin
+    qtpath: /opt/Qt/${QT_VERSION}/bin
   script:
     - !reference [.get-gams]
     - !reference [.gams-folder-deg]
@@ -61,7 +61,7 @@ test-leg:
   tags: [linux]
   allow_failure: true
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/builder-${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
   dependencies: [fetch-ci-scripts,build-leg]
   script:
@@ -90,10 +90,11 @@ test-wei:
   tags: [windows]
   allow_failure: true
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-${QT_IMAGE_VERSION}:latest
   dependencies: [fetch-ci-scripts,build-wei]
   script:
     - $env:Path = "C:\Miniconda\Library\bin;C:\Miniconda\DLLs;" + $env:Path
+    - $env:Path = "C:\Qt\Tools\icu\bin64;" + $env:PATH
     - !reference [.get-gams-wei]
     - !reference [.gams-folder-wei]
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
@@ -121,3 +122,6 @@ test-wei:
       - build/src/bin/*
     reports:
       junit: build/reports/*
+
+secret_detection:
+  tags: [linux]
