@@ -13,7 +13,7 @@ build-dac:
     - GAMS_CORE_PATH="${GAMS_FOR_MACOS}"
     - PATH="${qtpath}:${GAMS_FOR_MACOS}:${PATH}"
     - qmake ../gams-mii.pro CONFIG+=release && make -j4
-  needs: [fetch-ci-scripts]
+  needs: [fetch-ci-scripts, quality-gate]
   artifacts:
     name: mii-dac
     expire_in: 2 hours
@@ -34,7 +34,7 @@ build-deg:
     - GAMS_CORE_PATH="${GAMS_FOR_MACOS}"
     - PATH="${qtpath}:${GAMS_FOR_MACOS}:${PATH}"
     - qmake ../gams-mii.pro CONFIG+=release && make -j4
-  needs: [fetch-ci-scripts]
+  needs: [fetch-ci-scripts, quality-gate]
   artifacts:
     name: mii-deg
     expire_in: 2 hours
@@ -44,9 +44,9 @@ build-leg:
   stage: build
   tags: [linux]
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/builder-${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
-  needs: [fetch-ci-scripts]
+  needs: [fetch-ci-scripts, quality-gate]
   variables:
     DOLLAR_GAMS: $$$$GAMS_DISTRIB
   script:
@@ -65,11 +65,11 @@ build-leg:
 build-wei:
   stage: build
   tags: [windows]
-  needs: [fetch-ci-scripts]
+  needs: [fetch-ci-scripts, quality-gate]
   variables:
      cmd_vcvars: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-${QT_IMAGE_VERSION}:latest
   script:
     - $env:Path = "C:\Miniconda\Library\bin;C:\Miniconda\DLLs;" + $env:Path
     - $env:Path = "C:\Qt\Tools\icu\bin64;" + $env:PATH
@@ -97,11 +97,11 @@ build-wei-debug:
       when: never
     - when: on_success
   tags: [windows]
-  needs: [fetch-ci-scripts]
+  needs: [fetch-ci-scripts, quality-gate]
   variables:
      cmd_vcvars: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-${QT_IMAGE_VERSION}:latest
   script:
     - $env:Path = "C:\Miniconda\Library\bin;C:\Miniconda\DLLs;" + $env:Path
     - $env:Path = "C:\Qt\Tools\icu\bin64;" + $env:PATH

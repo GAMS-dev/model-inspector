@@ -1,5 +1,6 @@
 stages:
   - fetch-scripts
+  - quality
   - build
   - test
   - pack
@@ -11,11 +12,13 @@ include:
     file: '.fetch-job.yml'
   - project: 'devel/ciscripts'
     file: .shared-vars.yml
+  - 'ci/.gitlab-ci-06-quality-gate.yml'
   - 'ci/.gitlab-ci-09-build.yml'
   - 'ci/.gitlab-ci-12-test.yml'
   - 'ci/.gitlab-ci-15-pack.yml'
   - 'ci/.gitlab-ci-20-analyze.yml'
   - 'ci/.gitlab-ci-24-deploy.yml'
+  - template: Security/Secret-Detection.gitlab-ci.yml
 
 variables:
   extends: .shared-variables
@@ -29,7 +32,7 @@ variables:
       value: $CUSTOM_BRANCH
       description: "Name of custom branch, 0 if published distribution with version as specified should be taken or X.Y.Z"
   QT_IMAGE_VERSION:
-      value: builder-qt6.8
+      value: qt6.8
       description: "Current Qt image version"
   QT_VERSION:
     value: 6.8.2

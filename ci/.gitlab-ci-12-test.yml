@@ -61,7 +61,7 @@ test-leg:
   tags: [linux]
   allow_failure: true
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/leg/builder-${QT_IMAGE_VERSION}:latest
     entrypoint: [""]   # prevent startup.sh
   dependencies: [fetch-ci-scripts,build-leg]
   script:
@@ -90,7 +90,7 @@ test-wei:
   tags: [windows]
   allow_failure: true
   image:
-    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/${QT_IMAGE_VERSION}:latest
+    name: $GAMS_CONTAINER_REGISTRY/qt-machines/wei/builder-${QT_IMAGE_VERSION}:latest
   dependencies: [fetch-ci-scripts,build-wei]
   script:
     - $env:Path = "C:\Miniconda\Library\bin;C:\Miniconda\DLLs;" + $env:Path
@@ -122,3 +122,6 @@ test-wei:
       - build/src/bin/*
     reports:
       junit: build/reports/*
+
+secret_detection:
+  tags: [linux]
